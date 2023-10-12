@@ -1,0 +1,68 @@
+{
+    "type": "object",
+    "properties": {
+        "data_source_name": {
+            "type": "string",
+            "minLength": 3
+        },
+        "data_source_type": {
+            "type": "string",
+            "minLength": 3
+        },
+        "data_source_properties": {
+            "type": "object",
+            "minProperties": 1
+        },
+        "enabled": {
+            "type": "boolean"
+        },
+        "ingest_entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "integer"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "schema": {
+                        "type": "string"
+                    },
+                    "table": {
+                        "type": "string"
+                    },
+                    "columns": {
+                        "type": "string"
+                    },
+                    "load_type": {
+                        "type": "string",
+                        "enum": ["full", "delta"]
+                    },
+                    "delta_date_column": {
+                        "type": ["string", "null"]
+                    },
+                    "delta_upsert_key": {
+                        "type": ["string", "null"]
+                    }
+                },
+                "required": [
+                    "version",
+                    "display_name",
+                    "enabled"
+                ]
+            }
+        }
+    },
+    "required": [
+        "data_source_name",
+        "data_source_type",
+        "enabled",
+        "ingest_entities"
+    ],
+    "additionalProperties": false
+}

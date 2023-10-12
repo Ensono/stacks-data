@@ -1,0 +1,25 @@
+{
+    "gx_directory_path": "/dbfs/great_expectations/",
+    "dataset_name": "name_of_the_dataset",
+    "dq_input_path": "path_to_the_input_data_location",
+    "dq_output_path": "path_to_the_dq_target_location",
+    "datasource_config": [
+        {
+            "datasource_name": "data_asset_name__eg_table_or_file_name",
+            "datasource_type": "spark_readable_source_system_type",
+            "data_location": "path_to_the_data_within_the_dq_input_path_or_fully_qualified_table_name",
+            "expectation_suite_name": "expectation_suite_name",
+            "validation_config": [
+                {
+                    "column_name": "name_of_the_validated_column",
+                    "expectations": [
+                        {
+                            "expectation_type": "name_of_the_GX_expectation_class",
+                            "expectation_kwargs": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

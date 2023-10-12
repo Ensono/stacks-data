@@ -1,0 +1,23 @@
+{% set linked_service_type = 'AzureSqlDatabase' if data_source_type == 'azure_sql' else '' -%}
+resource "azurerm_data_factory_linked_custom_service" "ls_{{ dataset_name }}" {
+  name            = "ls_{{ dataset_name }}"
+  data_factory_id = data.azurerm_data_factory.factory.id
+  integration_runtime {
+    name = var.integration_runtime_name
+  }
+  type                 = "{{ linked_service_type }}"
+  description          = "{{ data_source_type | upper }} linked service."
+  type_properties_json = <<JSON
+{
+  "connectionString": "${var.linked_service_connectionstring}",
+  "password": {
+      "type": "AzureKeyVaultSecret",
+      "store": {
+          "referenceName": "${var.key_vault_linked_service_name}",
+          "type": "LinkedServiceReference"
+      },
+      "secretName": "{{ data_source_password_key_vault_secret_name }}"
+  }
+}
+JSON
+}

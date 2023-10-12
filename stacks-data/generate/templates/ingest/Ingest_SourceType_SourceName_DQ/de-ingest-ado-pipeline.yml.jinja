@@ -1,0 +1,424 @@
+{% set pipeline_name = 'ingest_' ~ dataset_name -%}
+# Build and deploy pipeline for job {{ pipeline_name }}
+
+name: "$(Build.SourceBranchName)-init"
+
+pr:
+  branches:
+    include:
+      - "main"
+  paths:
+    include:
+      - de_workloads/ingest/{{ pipeline_name }}/*
+
+trigger:
+  branches:
+    include:
+      - "main"
+  paths:
+    include:
+      - de_workloads/ingest/{{ pipeline_name }}/*
+
+variables:
+  - template: ../../../build/common-vars.yml
+  - template: ../../../de_build/job-pipeline-vars.yml
+  - template: ../../../build/version-data-vars.yml
+  - name: job
+    value: "{{ pipeline_name }}"
+  - name: jobtype
+    value: "ingest"
+  - name: self_repo_job_dir
+    value: "$(self_repo_dir)/de_workloads/$(jobtype)/$(job)"
+  - name: self_repo_adf_dir
+    value: "$(self_repo_job_dir)/data_factory"
+  - name: test_unit_src
+    value: "de_workloads/$(jobtype)/$(job)/tests/unit/"
+  - name: test_end_to_end_src
+    value: "de_workloads/$(jobtype)/$(job)/tests/end_to_end/features/"
+  - name: junit_src
+    value: "de_workloads/$(jobtype)/$(job)/junit"
+  - name: self_repo_sparkjob_dir
+    value: "$(self_repo_job_dir)/spark_jobs"
+  - name: self_repo_adf_src
+    value: "de_workloads/$(jobtype)/$(job)/data_factory"
+  - name: self_repo_blob_config
+    value: "$(self_repo_job_dir)/config"
+  - name: blob_config_destination
+    value: "config/$(jobtype)/$(job)"
+  - name: tf_state_key
+    value: $(domain)_$(jobtype)_$(job)
+  - name: dbfs_destination
+    value: 'dbfs:/FileStore/scripts/{{ pipeline_name }}'
+  - name: self_repo_spark_src
+    value: "de_workloads/$(jobtype)/$(job)/spark_jobs"
+
+pool:
+  name: $(agentpool_name)
+
+stages:
+  - stage: Build_Stage
+    variables:
+      {%- for group in ado_variable_groups_nonprod %}
+      - group: {{ group }}
+      {%- endfor %}
+    jobs:
+      - job: Build_Job
+        displayName: "Build_Job"
+        steps:
+          - task: Bash@3
+            displayName: "Clean Workspace"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Cleaning workspace..."
+                sudo rm -rf $(Build.SourcesDirectory)/*
+                sudo rm -rf $(Build.SourcesDirectory)/.pytest_cache/*
+                sudo rm -f $(Build.SourcesDirectory)/.pytest_cache/.gitignore
+          - template: ../../../build/azDevOps/templates/air-infrastructure-data-setup.yml
+            parameters:
+              TaskctlVersion: {% raw %}${{ variables.TaskctlVersion }}{% endraw %}
+          - script: |
+              lastTag=$(git tag --sort=-creatordate | head -n 1)
+              if [[ -z $lastTag ]]; then
+                major=$(version_major)
+                minor=$(version_minor)
+                revision=$(version_revision)
+                echo "Last Tag: NOT Present"
+              else
+                IFS='.' read -ra versionParts <<< "${lastTag#v}"
+                major="${versionParts[0]}"
+                minor="${versionParts[1]}"
+                lastrevision="${versionParts[2]}"
+                revision=$((lastrevision + 1))
+                echo "Last Tag: $lastTag"
+              fi
+              newVersion="${major}.${minor}.${revision}"
+              echo "New Version: $newVersion"
+              echo "##vso[task.setvariable variable=major]$major"
+              echo "##vso[task.setvariable variable=minor]$minor"
+              echo "##vso[task.setvariable variable=revision]$revision"
+              echo "##vso[task.setvariable variable=newVersion]$newVersion"
+            displayName: Determine New Version
+          - task: Bash@3
+            displayName: "TaskCTL: Setup"
+            inputs:
+              targetType: inline
+              script: taskctl setup
+            env:
+              DOCKER_IMAGE_TAG: $(newVersion)
+          - task: Bash@3
+            displayName: "TaskCTL: Lint"
+            inputs:
+              targetType: inline
+              script: taskctl lint
+            env:
+              CLOUD_PROVIDER: "$(cloud_provider)"
+              ARM_TENANT_ID: "$(azure-tenant-id)"
+              ARM_SUBSCRIPTION_ID: "$(azure-subscription-id)"
+              ARM_CLIENT_ID: "$(azure-client-id)"
+              ARM_CLIENT_SECRET: "$(azure-client-secret)"
+              TF_FILE_LOCATION: ./$(jobtype)/jobs/$(job)/
+
+  #############################################################
+  # Deploy to non Prod
+  #############################################################
+  - stage: Deploy_NonPROD_Stage
+    variables:
+      {%- for group in ado_variable_groups_nonprod %}
+      - group: {{ group }}
+      {%- endfor %}
+      - name: Environment.ShortName
+        value: dev
+    dependsOn: Build_Stage
+    jobs:
+      - deployment: Deploy_NonPROD
+        displayName: "Deploy To NonPROD"
+        environment: {% raw %}${{ variables.domain }}-nonprod{% endraw %}
+        pool:
+          name: $(agentpool_name)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: Bash@3
+                  displayName: "Clean Workspace"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      echo "Cleaning workspace..."
+                      sudo rm -rf $(Build.SourcesDirectory)/*
+                      sudo rm -rf $(Build.SourcesDirectory)/.pytest_cache/*
+                      sudo rm -f $(Build.SourcesDirectory)/.pytest_cache/.gitignore
+
+                - template: ../../../build/azDevOps/templates/air-infrastructure-data-setup.yml
+                  parameters:
+                    TaskctlVersion: {% raw %}${{ variables.TaskctlVersion }}{% endraw %}
+
+                # Publish Config files
+                - task: AzureCLI@2
+                  inputs:
+                    azureSubscription: $(service_connection)
+                    scriptType: "pscore"
+                    scriptLocation: "inlineScript"
+                    inlineScript: "az storage blob upload-batch `
+                      --source $(self_repo_blob_config) `
+                      --destination $(blob_config_destination) `
+                      --account-name $(blob_configStorage) `
+                      --overwrite"
+
+                - task: AzureKeyVault@2
+                  inputs:
+                    azureSubscription: $(service_connection)
+                    KeyVaultName: $(keyvault_name)
+                    SecretsFilter: "*"
+                    RunAsPreJob: false
+                  displayName: "Get secrets from the keyvault"
+
+                - task: Bash@3
+                  displayName: "TaskCTL: Databricks"
+                  inputs:
+                    targetType: inline
+                    script: taskctl databricks
+                  env:
+                    DATABRICKS_HOST: "$(databricks-host)"
+                    DATABRICKS_TOKEN: "$(databricks-token)"
+                    DATABRICKS_DBFS_LOCATION: "$(dbfs_destination)"    #self_repo_spark_src
+                    DATABRICKS_SOURCE_LOCATION: "./$(self_repo_spark_src)/"
+
+                # Publish ADF
+                - task: Bash@3
+                  displayName: "TaskCTL: infrastructure"
+                  inputs:
+                    targetType: inline
+                    script: taskctl -d infrastructure
+                  env:
+                    CLOUD_PROVIDER: "$(cloud_provider)"
+                    ARM_TENANT_ID: "$(azure-tenant-id)"
+                    ARM_SUBSCRIPTION_ID: "$(azure-subscription-id)"
+                    ARM_CLIENT_ID: "$(azure-client-id)"
+                    ARM_CLIENT_SECRET: "$(azure-client-secret)"
+                    TF_FILE_LOCATION: "./$(self_repo_adf_src)/"
+                    ENV_NAME:
+                      $(Environment.ShortName)
+                      # Azure Authentication
+                      # Terraform Backend Configuration
+                    TF_STATE_CONTAINER: $(tf_state_container)
+                    TF_STATE_KEY: $(tf_state_key)
+                    TF_STATE_RG: $(tf_state_rg)
+                    TF_STATE_STORAGE: $(tf_state_storage)
+                    TF_BACKEND_ARGS: "key=$(tf_state_key),storage_account_name=$(TF_STATE_STORAGE),resource_group_name=$(TF_STATE_RG),container_name=$(TF_STATE_CONTAINER),subscription_id=$(azure-subscription-id),tenant_id=$(azure-tenant-id),client_id=$(azure-client-id),client_secret= $(azure-client-secret)"
+                    TF_VAR_data_factory_resource_group_name: $(resource_group)
+                    TF_VAR_data_factory: $(datafactoryname)
+                    TF_VAR_integration_runtime_name: $(integration_runtime_name)
+                    TF_VAR_linked_service_connectionstring: "$({{ data_source_connection_string_variable_name }})"
+
+      #   # Start Testing
+      - deployment: Test_NonPROD
+        displayName: "Testing  NonPROD"
+        environment: {% raw %}${{ variables.domain }}-nonprod{% endraw %}
+        dependsOn: Deploy_NonPROD
+        pool:
+          name: $(agentpool_name)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: ../../../de_build/de-workload-testing.yml
+                  parameters:
+                    pythonVersion: $(pythonVersion)
+                    githubToken: $(github_token)
+                    workingDirectory: './'
+                    unitTestLocation: './$(test_unit_src)'
+                    e2eTestLocation: './$(test_end_to_end_src)'
+                    azureSubscriptionId: $(azure-subscription-id)
+                    azureResourceGroupName: $(resource_group)
+                    azureDataFactoryName: $(datafactoryname)
+                    azureRegionName: $(region)
+                    azureStorageAccountName: $(blob_adls_storage)
+                    azureClientId: $(azure-client-id)
+                    azureClientSecret: $(azure-client-secret)
+                    azureTenantId: $(azure-tenant-id)
+
+  #############################################################
+  # Deploy to Prod
+  #############################################################
+  - stage: Deploy_Prod_Stage
+    dependsOn:
+      - Build_Stage
+      - Deploy_NonPROD_Stage
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      {%- for group in ado_variable_groups_prod %}
+      - group: {{ group }}
+      {%- endfor %}
+      - name: Environment.ShortName
+        value: prod
+    jobs:
+      - deployment: Deploy_PRDO
+        displayName: "Deploy To PROD"
+        environment: {% raw %}${{ variables.domain }}-prod{% endraw %}
+        pool:
+          name: $(agentpool_name)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: Bash@3
+                  displayName: "Clean Workspace"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      echo "Cleaning workspace..."
+                      sudo rm -rf $(Build.SourcesDirectory)/*
+                      sudo rm -rf $(Build.SourcesDirectory)/.pytest_cache/*
+                      sudo rm -f $(Build.SourcesDirectory)/.pytest_cache/.gitignore
+
+                - template: ../../../build/azDevOps/templates/air-infrastructure-data-setup.yml
+                  parameters:
+                    TaskctlVersion: {% raw %}${{ variables.TaskctlVersion }}{% endraw %}
+
+                # Publish Config files
+                - task: AzureCLI@2
+                  inputs:
+                    azureSubscription: $(service_connection)
+                    scriptType: "pscore"
+                    scriptLocation: "inlineScript"
+                    inlineScript: "az storage blob upload-batch `
+                      --source $(self_repo_blob_config) `
+                      --destination $(blob_config_destination) `
+                      --account-name $(blob_configStorage) `
+                      --overwrite"
+
+                - task: AzureKeyVault@2
+                  inputs:
+                    azureSubscription: $(service_connection)
+                    KeyVaultName: $(keyvault_name)
+                    SecretsFilter: "*"
+                    RunAsPreJob: false
+                  displayName: "Get secrets from the keyvault"
+
+                - task: Bash@3
+                  displayName: "TaskCTL: Databricks"
+                  inputs:
+                    targetType: inline
+                    script: taskctl databricks
+                  env:
+                    # Dotnet Build
+                    DATABRICKS_HOST: "$(databricks-host)"
+                    DATABRICKS_TOKEN: "$(databricks-token)"
+                    DATABRICKS_DBFS_LOCATION: "$(dbfs_destination)"    #self_repo_spark_src
+                    DATABRICKS_SOURCE_LOCATION: "./$(self_repo_spark_src)/"
+
+
+                # Publish ADF
+                - task: Bash@3
+                  displayName: "TaskCTL: infrastructure"
+                  inputs:
+                    targetType: inline
+                    script: taskctl infrastructure
+                  env:
+                    CLOUD_PROVIDER: "$(cloud_provider)"
+                    ARM_TENANT_ID: "$(azure-tenant-id)"
+                    ARM_SUBSCRIPTION_ID: "$(azure-subscription-id)"
+                    ARM_CLIENT_ID: "$(azure-client-id)"
+                    ARM_CLIENT_SECRET: "$(azure-client-secret)"
+                    TF_FILE_LOCATION: "./$(self_repo_adf_src)/"
+                    ENV_NAME:
+                      $(Environment.ShortName)
+                      # Azure Authentication
+                      # Terraform Backend Configuration
+                    TF_STATE_CONTAINER: $(tf_state_container)
+                    TF_STATE_KEY: $(tf_state_key)
+                    TF_STATE_RG: $(tf_state_rg)
+                    TF_STATE_STORAGE: $(tf_state_storage)
+                    TF_BACKEND_ARGS: "key=$(tf_state_key),storage_account_name=$(TF_STATE_STORAGE),resource_group_name=$(TF_STATE_RG),container_name=$(TF_STATE_CONTAINER),subscription_id=$(azure-subscription-id),tenant_id=$(azure-tenant-id),client_id=$(azure-client-id),client_secret= $(azure-client-secret)"
+                    TF_VAR_data_factory_resource_group_name: $(resource_group)
+                    TF_VAR_data_factory: $(datafactoryname)
+                    TF_VAR_integration_runtime_name: $(integration_runtime_name)
+                    TF_VAR_linked_service_connectionstring: "$({{ data_source_connection_string_variable_name }})"
+
+  - stage: Release
+    dependsOn:
+      - Build_Stage
+      - Deploy_Prod_Stage
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['create_release'], 'true'))
+    jobs:
+      - job: CreateGitHubRelease
+        pool:
+          name: $(agentpool_name)
+        steps:
+          - task: Bash@3
+            displayName: "Clean Workspace"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Cleaning workspace..."
+                sudo rm -rf $(Build.SourcesDirectory)/*
+                sudo rm -rf $(Build.SourcesDirectory)/.pytest_cache/*
+                sudo rm -f $(Build.SourcesDirectory)/.pytest_cache/.gitignore
+
+          # Check out the repo so that it can be tagged
+          - checkout: self
+            persistCredentials: true
+
+          - script: |
+              lastTag=$(git tag --sort=-creatordate | head -n 1)
+              if [[ -z $lastTag ]]; then
+                major=$(version_major)
+                minor=$(version_minor)
+                revision=$(version_revision)
+                echo "Last Tag: NOT Present"
+              else
+                IFS='.' read -ra versionParts <<< "${lastTag#v}"
+                major="${versionParts[0]}"
+                minor="${versionParts[1]}"
+                lastrevision="${versionParts[2]}"
+                revision=$((lastrevision + 1))
+                echo "Last Tag: $lastTag"
+              fi
+              newVersion="${major}.${minor}.${revision}"
+              echo "New Version: $newVersion"
+              echo "##vso[task.setvariable variable=major]$major"
+              echo "##vso[task.setvariable variable=minor]$minor"
+              echo "##vso[task.setvariable variable=revision]$revision"
+              echo "##vso[task.setvariable variable=newVersion]$newVersion"
+            displayName: Determine New Version
+
+          - task: Bash@3
+            displayName: Tag Code
+            inputs:
+              targetType: "inline"
+              script: |
+                commit=$(Build.SourceVersion)
+                tag=$(git tag --contains $commit)
+                if [ -z "$tag" ]; then
+                  echo "Tag does not exist for the commit"
+                  git config user.name "BuildService"
+                  git config user.email "builder@${COMPANY}.com"
+                  echo "Creating tag v${newVersion}..."
+                  git tag -a "v${newVersion}" -m "Release created by Azure DevOps"
+                  git push origin "v${newVersion}"
+                  echo "##vso[task.setvariable variable=ShouldCreateRelease]True"
+                else
+                  echo "Tag '$tag' already exists for the commit.Skipping tag creation"
+                  echo "##vso[task.setvariable variable=ShouldCreateRelease]false"
+                fi
+            env:
+              COMPANY: $(company)
+              newVersion: $(newVersion)
+
+          # #           # Create a GitHub release with these packages
+          - task: GitHubRelease@1
+            displayName: Create GitHub Release
+            inputs:
+              gitHubConnection: $(github_release_service_connection)
+              repositoryName: '$(Build.Repository.Name)'
+              tag: v${newVersion}
+              releaseNotesSource: "inline"
+              releaseNotesInline: "$(major).$(minor).$(revision)"
+              tagSource: "gitTag"
+              changeLogCompareToRelease: "lastFullRelease"
+              changeLogType: "commitBased"
+            condition: eq(variables['ShouldCreateRelease'], 'true')
