@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
-version = "0.1.0"
+version = "0.2.0"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Andy Durkan <andy.durkan@ensono.com>",
@@ -42,6 +42,7 @@ flake8-docstrings = "^1.7.0"
 pydocstyle = "^6.3.0"
 tomli = "^2.0.1"
 pytest-mock = "^3.11.1"
+coverage = "^7.3.2"
 
 [build-system]
 requires = ["poetry-core"]
