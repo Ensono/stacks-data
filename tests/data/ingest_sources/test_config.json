@@ -1,0 +1,51 @@
+{
+    "data_source_name": "get_config_test",
+    "data_source_type": "azure_sql",
+    "enabled": true,
+    "ingest_entities": [
+        {
+            "version": 1,
+            "display_name": "movies.keywords",
+            "enabled": true,
+            "schema": "movies",
+            "table": "keywords",
+            "columns": "[id], [keywords]",
+            "load_type": "full",
+            "delta_date_column": null,
+            "delta_upsert_key": null
+        },
+        {
+            "version": 1,
+            "display_name": "movies.links",
+            "enabled": true,
+            "schema": "movies",
+            "table": "links",
+            "columns": "[movieId], [imdbId], [tmdbId]",
+            "load_type": "full",
+            "delta_date_column": null,
+            "delta_upsert_key": null
+        },
+        {
+            "version": 1,
+            "display_name": "movies.movies_metadata",
+            "enabled": true,
+            "schema": "movies",
+            "table": "movies_metadata",
+            "columns": "[adult], [belongs_to_collection], [budget], [genres], [homepage], [id], [imdb_id], [original_language], [original_title], [overview], [popularity], [poster_path], [production_companies], [production_countries], [release_date], [revenue], [runtime], [spoken_languages], [status], [tagline], [title], [video], [vote_average], [vote_count]",
+            "load_type": "full",
+            "delta_date_column": null,
+            "delta_upsert_key": null
+        },
+        {
+            "version": 1,
+            "display_name": "movies.ratings_small",
+            "enabled": true,
+            "schema": "movies",
+            "table": "ratings_small",
+            "columns": "[userId], [movieId], [rating], [timestamp]",
+            "load_type": "delta",
+            "delta_date_column": "DATEADD(SECOND,[timestamp],'1970-01-01')",
+            "delta_upsert_key": "[userId], [movieId]"
+        }
+    ]
+}

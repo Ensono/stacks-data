@@ -1,0 +1,25 @@
+{
+    "container_name": "staging",
+    "gx_directory_path": "/dbfs/great_expectations/",
+    "dataset_name": "movies_dataset",
+    "dq_output_path": "abfss://staging@{ADLS_ACCOUNT}.dfs.core.windows.net/ingest_azure_sql_example/",
+    "datasource_config": [
+        {
+            "datasource_name": "movies_metadata",
+            "datasource_type": "table",
+            "data_location": "staging.movies_metadata",
+            "expectation_suite_name": "movies_metadata_suite",
+            "validation_config": [
+                {
+                    "column_name": "adult",
+                    "expectations": [
+                        {
+                            "expectation_type": "expect_column_values_to_not_be_null",
+                            "expectation_kwargs": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

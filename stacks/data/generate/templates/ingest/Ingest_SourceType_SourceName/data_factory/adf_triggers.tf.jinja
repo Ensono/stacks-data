@@ -1,0 +1,24 @@
+{% set pipeline_name = 'ingest_' ~ dataset_name -%}
+resource "azurerm_data_factory_trigger_tumbling_window" "trigger_{{ pipeline_name }}" {
+  name            = "trigger_{{ pipeline_name }}"
+  data_factory_id = data.azurerm_data_factory.factory.id
+  start_time      = "{{ trigger_start }}"
+  end_time        = "{{ trigger_end }}"
+  frequency       = "{{ trigger_frequency }}"
+  interval        = {{ trigger_interval }}
+  delay           = "{{ trigger_delay }}"
+  max_concurrency = 4
+  activated       = false
+
+  pipeline {
+    name = "{{ pipeline_name }}"
+    parameters = {
+      window_start = "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-dd')}",
+      window_end   = "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-dd')}"
+    }
+  }
+
+  depends_on = [
+    azurerm_resource_group_template_deployment.pipeline_{{ pipeline_name }}
+  ]
+}
