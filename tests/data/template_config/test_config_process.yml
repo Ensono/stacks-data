@@ -1,0 +1,6 @@
+pipeline_name: test_pipeline
+pipeline_description: Pipeline for testing
+ado_variable_groups_nonprod:
+  - nonprod_test_group
+ado_variable_groups_prod:
+  - prod_group

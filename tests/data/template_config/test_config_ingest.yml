@@ -1,0 +1,11 @@
+dataset_name: test_dataset
+pipeline_description: Pipeline for testing
+data_source_type: azure_sql
+key_vault_linked_service_name: test_keyvault
+data_source_password_key_vault_secret_name: test_password
+data_source_connection_string_variable_name: test_connection_string
+ado_variable_groups_nonprod:
+  - nonprod_test_group
+ado_variable_groups_prod:
+  - prod_group
+bronze_container: test_raw

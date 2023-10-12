@@ -1,0 +1,327 @@
+{% set pipeline_name = 'ingest_' ~ dataset_name -%}
+{% set source_type = 'AzureSqlSource' if data_source_type == 'azure_sql' else '' -%}
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/{{ pipeline_name }}')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "{{ pipeline_description }}",
+                "activities": [
+                    {
+                        "name": "Get_Ingest_Config",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "Get_Ingest_Config",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "config_container": "config",
+                                "config_path": {
+                                    "value": "ingest/@{pipeline().parameters.data_source_name}/ingest_sources",
+                                    "type": "Expression"
+                                },
+                                "config_file": "ingest_config.json"
+                            }
+                        }
+                    },
+                    {
+                        "name": "For_Each_Ingest_Entity",
+                        "type": "ForEach",
+                        "dependsOn": [
+                            {
+                                "activity": "Get_Ingest_Config",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "output_path",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "items": {
+                                "value": "@activity('Get_Ingest_Config').output.pipelineReturnValue['config'][0]['ingest_entities']",
+                                "type": "Expression"
+                            },
+                            "isSequential": false,
+                            "activities": [
+                                {
+                                    "name": "{{ data_source_type | upper }}_to_ADLS",
+                                    "type": "Copy",
+                                    "dependsOn": [
+                                        {
+                                            "activity": "Generate_Ingest_Query",
+                                            "dependencyConditions": [
+                                                "Succeeded"
+                                            ]
+                                        }
+                                    ],
+                                    "policy": {
+                                        "timeout": "1:00:00",
+                                        "retry": 0,
+                                        "retryIntervalInSeconds": 30,
+                                        "secureOutput": false,
+                                        "secureInput": false
+                                    },
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "{{ source_type }}",
+                                            "additionalColumns": [
+                                                {
+                                                    "name": "meta_ingestion_datetime",
+                                                    "value": {
+                                                        "value": "@utcNow()",
+                                                        "type": "Expression"
+                                                    }
+                                                },
+                                                {
+                                                    "name": "meta_ingestion_pipeline",
+                                                    "value": {
+                                                        "value": "@pipeline().Pipeline",
+                                                        "type": "Expression"
+                                                    }
+                                                },
+                                                {
+                                                    "name": "meta_ingestion_run_id",
+                                                    "value": {
+                                                        "value": "@variables('run_id')",
+                                                        "type": "Expression"
+                                                    }
+                                                }
+                                            ],
+                                            "sqlReaderQuery": {
+                                                "value": "@activity('Generate_Ingest_Query').output.pipelineReturnValue['generated_query']",
+                                                "type": "Expression"
+                                            },
+                                            "queryTimeout": "00:10:00",
+                                            "partitionOption": "None"
+                                        },
+                                        "sink": {
+                                            "type": "ParquetSink",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSWriteSettings"
+                                            },
+                                            "formatSettings": {
+                                                "type": "ParquetWriteSettings"
+                                            }
+                                        },
+                                        "enableStaging": false,
+                                        "validateDataConsistency": true,
+                                        "logSettings": {
+                                            "enableCopyActivityLog": true,
+                                            "copyActivityLogSettings": {
+                                                "logLevel": "Warning",
+                                                "enableReliableLogging": false
+                                            },
+                                            "logLocationSettings": {
+                                                "linkedServiceName": {
+                                                    "referenceName": "ls_Blob_ConfigStore",
+                                                    "type": "LinkedServiceReference"
+                                                },
+                                                "path": {
+                                                    "value": "adf-config/logs/@{pipeline().Pipeline}/@{item()['display_name']}",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        },
+                                        "translator": {
+                                            "type": "TabularTranslator",
+                                            "typeConversion": true,
+                                            "typeConversionSettings": {
+                                                "allowDataTruncation": true,
+                                                "treatBooleanAsNumber": false
+                                            }
+                                        }
+                                    },
+                                    "inputs": [
+                                        {
+                                            "referenceName": "ds_{{ dataset_name }}",
+                                            "type": "DatasetReference",
+                                            "parameters": {}
+                                        }
+                                    ],
+                                    "outputs": [
+                                        {
+                                            "referenceName": "ds_dp_DataLake_Parquet",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "filename": {
+                                                    "value": "@{variables('run_id')}.parquet",
+                                                    "type": "Expression"
+                                                },
+                                                "path": {
+                                                    "value": "@{variables('output_path')}/@{item()['display_name']}/v@{string(item()['version'])}/@{item()['load_type']}/rundate=@{replace(utcNow(),':','')}/@{if(equals(item()['load_type'], 'delta'), concat('window=',pipeline().parameters.window_start,'_', pipeline().parameters.window_end), '')}",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Generate_Ingest_Query",
+                                    "type": "ExecutePipeline",
+                                    "dependsOn": [],
+                                    "userProperties": [],
+                                    "typeProperties": {
+                                        "pipeline": {
+                                            "referenceName": "Generate_Ingest_Query",
+                                            "type": "PipelineReference"
+                                        },
+                                        "waitOnCompletion": true,
+                                        "parameters": {
+                                            "ingest_entity_config": {
+                                                "value": "@item()",
+                                                "type": "Expression"
+                                            },
+                                            "window_start": {
+                                                "value": "@pipeline().parameters.window_start",
+                                                "type": "Expression"
+                                            },
+                                            "window_end": {
+                                                "value": "@pipeline().parameters.window_end",
+                                                "type": "Expression"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "run_id",
+                        "type": "SetVariable",
+                        "dependsOn": [],
+                        "policy": {
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "variableName": "run_id",
+                            "value": {
+                                "value": "@{if(or(empty(pipeline().parameters.run_id),equals(pipeline().parameters.run_id, 'auto')), pipeline().RunId, pipeline().parameters.run_id)}",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    {
+                        "name": "automated_test_flag",
+                        "type": "SetVariable",
+                        "dependsOn": [
+                            {
+                                "activity": "run_id",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "variableName": "automated_test_flag",
+                            "value": {
+                                "value": "@startswith(variables('run_id'), pipeline().parameters.automated_test_prefix)",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    {
+                        "name": "output_path",
+                        "type": "SetVariable",
+                        "dependsOn": [
+                            {
+                                "activity": "automated_test_flag",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "variableName": "output_path",
+                            "value": {
+                                "value": "@{pipeline().parameters.default_output_path}@{if(variables('automated_test_flag'), concat('/automated_tests/', variables('run_id')), '')}",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {},
+                    "cancelAfter": {}
+                },
+                "parameters": {
+                    "automated_test_prefix": {
+                        "type": "string",
+                        "defaultValue": "automated_test_"
+                    },
+                    "data_source_name": {
+                        "type": "string",
+                        "defaultValue": "{{ pipeline_name }}"
+                    },
+                    "run_id": {
+                        "type": "string",
+                        "defaultValue": "auto"
+                    },
+                    "window_end": {
+                        "type": "string",
+                        "defaultValue": "{{ window_end_default }}"
+                    },
+                    "window_start": {
+                        "type": "string",
+                        "defaultValue": "{{ window_start_default }}"
+                    },
+                    "default_output_path": {
+                        "type": "string",
+                        "defaultValue": "{{ pipeline_name }}"
+                    }
+                },
+                "variables": {
+                    "automated_test_flag": {
+                        "type": "Boolean"
+                    },
+                    "run_id": {
+                        "type": "String"
+                    },
+                    "output_path": {
+                        "type": "String"
+                    }
+                },
+                "folder": {
+                    "name": "Ingest"
+                },
+                "annotations": []
+            },
+            "dependsOn": []
+        }
+    ]
+}
