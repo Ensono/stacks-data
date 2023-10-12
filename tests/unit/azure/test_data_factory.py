@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import CreateRunResponse, PipelineRun
-from datastacks.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run
+from stacks.data.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run
 
 
 @pytest.fixture

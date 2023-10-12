@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 import yaml
-from datastacks.cli.datastacks_cli import ingest, processing
+from stacks.data.cli.datastacks_cli import ingest, processing
 
 
 TEST_CONFIG_DIRECTORY = "datastacks/tests/data/template_config/"

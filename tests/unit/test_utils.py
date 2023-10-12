@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from datastacks.utils import (
+from stacks.data.utils import (
     filter_files_by_extension,
     find_placeholders,
     substitute_env_vars,
