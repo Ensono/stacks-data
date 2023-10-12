@@ -27,7 +27,7 @@ delta-spark = "^2.4.0"
 behave = "^1.2.6"
 
 [tool.poetry.scripts]
-datastacks = "datastacks.cli.datastacks_cli:cli"
+datastacks = "stacks.data.cli.datastacks_cli:cli"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"

@@ -1,7 +1,6 @@
 setup_dev_environment:
 	echo "PYTHONPATH=." > .env
 	poetry install
-	poetry self add poetry-dotenv-plugin
 	poetry run pre-commit install
 
 test:

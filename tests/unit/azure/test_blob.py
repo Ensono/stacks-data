@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch, mock_open, call
 from azure.storage.blob import BlobServiceClient
-from datastacks.azure.blob import upload_file_to_blob, delete_blob_prefix
+from stacks.data.azure.blob import upload_file_to_blob, delete_blob_prefix
 
 TEST_CONTAINER = "test_container"
 TEST_DIRECTORY = "test_directory"

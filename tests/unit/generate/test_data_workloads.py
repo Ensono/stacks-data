@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from datastacks.generate.template_config import IngestWorkloadConfigModel
-from datastacks.generate.data_workloads import (
+from stacks.data.generate.template_config import IngestWorkloadConfigModel
+from stacks.data.generate.data_workloads import (
     validate_yaml_config,
     generate_pipeline,
     generate_target_dir,
@@ -46,8 +46,8 @@ def test_render_template_components(tmp_path):
 @pytest.mark.parametrize(
     "dq,expected_files", [(False, EXPECTED_FILE_LIST), (True, EXPECTED_FILE_LIST + EXPECTED_DQ_FILE_LIST)]
 )
-@patch("datastacks.generate.data_workloads.click.confirm")
-@patch("datastacks.generate.data_workloads.generate_target_dir")
+@patch("stacks.data.generate.data_workloads.click.confirm")
+@patch("stacks.data.generate.data_workloads.generate_target_dir")
 def test_generate_pipeline(mock_target_dir, mock_confirm, tmp_path, dq, expected_files):
     mock_target_dir.return_value = tmp_path
     mock_confirm.return_value = True
@@ -59,8 +59,8 @@ def test_generate_pipeline(mock_target_dir, mock_confirm, tmp_path, dq, expected
         assert Path(f"{target_dir}/{file_path}").exists()
 
 
-@patch("datastacks.generate.data_workloads.click.confirm")
-@patch("datastacks.generate.data_workloads.generate_target_dir")
+@patch("stacks.data.generate.data_workloads.click.confirm")
+@patch("stacks.data.generate.data_workloads.generate_target_dir")
 def test_generate_pipeline_new_path(mock_target_dir, mock_confirm, tmp_path):
     mock_target_dir.return_value = tmp_path
     mock_confirm.return_value = False
@@ -76,8 +76,8 @@ def test_generate_pipeline_new_path(mock_target_dir, mock_confirm, tmp_path):
 @pytest.mark.parametrize(
     "overwrite_confirm,expected_desc", [(False, "Pipeline for testing"), (True, "Pipeline for testing overwritten")]
 )
-@patch("datastacks.generate.data_workloads.click.confirm")
-@patch("datastacks.generate.data_workloads.generate_target_dir")
+@patch("stacks.data.generate.data_workloads.click.confirm")
+@patch("stacks.data.generate.data_workloads.generate_target_dir")
 def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, overwrite_confirm, expected_desc):
     mock_target_dir.return_value = tmp_path
     mock_confirm.return_value = True
@@ -102,8 +102,8 @@ def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, ov
     assert arm_template_dict["resources"][0]["properties"]["description"] == expected_desc
 
 
-@patch("datastacks.generate.data_workloads.click.confirm")
-@patch("datastacks.generate.data_workloads.generate_target_dir")
+@patch("stacks.data.generate.data_workloads.click.confirm")
+@patch("stacks.data.generate.data_workloads.generate_target_dir")
 def test_enum_templating(mock_target_dir, mock_confirm, tmp_path):
     mock_target_dir.return_value = tmp_path
     mock_confirm.return_value = True

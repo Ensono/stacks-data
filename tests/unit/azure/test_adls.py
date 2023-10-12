@@ -1,7 +1,7 @@
 import pytest
 from azure.storage.filedatalake import DataLakeServiceClient
 from unittest.mock import Mock, patch, call
-from datastacks.azure.adls import (
+from stacks.data.azure.adls import (
     delete_directories_adls,
     delete_directory_adls,
 )
@@ -26,7 +26,7 @@ def test_delete_directory_adls(adls_client_mock):
     adls_directory_client_mock.delete_directory.assert_called_once()
 
 
-@patch("datastacks.azure.adls.delete_directory_adls")
+@patch("stacks.data.azure.adls.delete_directory_adls")
 def test_delete_directories_adls(delete_directory_adls_mock, adls_client_mock):
     container_name = "test_container"
     directory_paths = ["test_directory1", "test_directory2"]

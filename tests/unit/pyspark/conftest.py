@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from pytest import fixture
 
-from datastacks.pyspark.pyspark_utils import get_spark_session
+from stacks.data.pyspark.pyspark_utils import get_spark_session
 
 TEST_DATA_DIR = Path(__file__).parent.resolve() / "data"
 TEST_CSV_DIR = TEST_DATA_DIR / "movies_dataset"
@@ -26,7 +26,7 @@ def spark(tmp_path_factory):
 
 @fixture
 def mock_adls_client():
-    with patch("datastacks.pyspark.storage_utils.DataLakeServiceClient") as mock_DataLakeServiceClient:
+    with patch("stacks.data.pyspark.storage_utils.DataLakeServiceClient") as mock_DataLakeServiceClient:
 
         def get_paths_side_effect(path, recursive=True):
             test_path = Path(TEST_CSV_DIR)
@@ -57,7 +57,7 @@ def json_contents():
 
 @fixture
 def mock_blob_client(json_contents):
-    with patch("datastacks.pyspark.storage_utils.BlobServiceClient") as mock_BlobServiceClient:
+    with patch("stacks.data.pyspark.storage_utils.BlobServiceClient") as mock_BlobServiceClient:
         mock_blob_client = MagicMock()
         mock_blob_client.download_blob.return_value.readall.return_value = json_contents
         mock_BlobServiceClient.return_value.get_blob_client.return_value = mock_blob_client
