@@ -1,0 +1,41 @@
+{% set pipeline_name = 'ingest_' ~ dataset_name -%}
+{
+    "data_source_name": "{{ pipeline_name }}",
+    "data_source_type": "{{ data_source_type }}",
+    "enabled": true,
+    "ingest_entities": [
+        {
+            "version": 1,
+            "display_name": "db_schema.table_name_1",
+            "enabled": true,
+            "schema": "db_schema",
+            "table": "table_name_1",
+            "columns": "*",
+            "load_type": "full",
+            "delta_date_column": null,
+            "delta_upsert_key": null
+        },
+        {
+            "version": 1,
+            "display_name": "db_schema.table_name_2",
+            "enabled": true,
+            "schema": "db_schema",
+            "table": "table_name_2",
+            "columns": "ColumnName_1, ColumnName_2, ColumnName_3",
+            "load_type": "delta",
+            "delta_date_column": "ColumnName_3",
+            "delta_upsert_key": "ColumnName_1"
+        },
+        {
+            "version": 1,
+            "display_name": "db_schema.table_name_3",
+            "enabled": true,
+            "schema": "db_schema",
+            "table": "table_name_3",
+            "columns": "ColumnName_1, ColumnName_2, ColumnName_3, ColumnName_4, ColumnName_5",
+            "load_type": "delta",
+            "delta_date_column": "ColumnName_3",
+            "delta_upsert_key": "ColumnName_1, ColumnName_2"
+        }
+    ]
+}

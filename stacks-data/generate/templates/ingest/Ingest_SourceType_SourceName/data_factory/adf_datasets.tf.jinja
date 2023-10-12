@@ -1,0 +1,12 @@
+{% set dataset_type = 'AzureSqlTable' if data_source_type == 'azure_sql' else '' -%}
+resource "azurerm_data_factory_custom_dataset" "ds_{{ dataset_name }}" {
+  name            = "ds_{{ dataset_name }}"
+  data_factory_id = data.azurerm_data_factory.factory.id
+  type            = "{{ dataset_type }}"
+  folder          = "External_Sources"
+  linked_service {
+    name = azurerm_data_factory_linked_custom_service.ls_{{ dataset_name }}.name
+  }
+  type_properties_json = jsonencode({})
+  schema_json          = jsonencode({})
+}

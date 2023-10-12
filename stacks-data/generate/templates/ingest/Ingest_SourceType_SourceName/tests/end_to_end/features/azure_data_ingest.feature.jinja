@@ -1,0 +1,15 @@
+{% set pipeline_name = 'ingest_' ~ dataset_name -%}
+Feature:Azure Data Ingest
+  I want to ingest data
+  so that it is available in Azure data lake storage
+
+  Scenario Outline: Data Factory Ingest SQL Database into ADLS
+    Given the ADF pipeline {{ pipeline_name }} has been triggered with <parameters>
+    And I poll the pipeline every 10 seconds until it has completed
+    Then the ADF pipeline {{ pipeline_name }} has finished with state Succeeded
+    And the ADF pipeline {{ pipeline_name }} completed in less than 480 seconds
+    And the files <output_files> are present in the ADLS container {{ bronze_container }} in the directory {{ pipeline_name }}
+
+    Examples: Output files
+    |parameters|output_files|
+    |{"window_start" : "{{ window_start_default }}", "window_end": "{{ window_end_default }}"}|["db_schema.table_name_1.parquet", "db_schema.table_name_2.parquet", "db_schema.table_name_3.parquet"]|

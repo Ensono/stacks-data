@@ -1,0 +1,163 @@
+{% set process_data_python_path = "dbfs:/FileStore/scripts/" ~ pipeline_name ~ "/process.py" -%}
+{% set data_quality_python_path = "dbfs:/FileStore/scripts/" ~ pipeline_name ~ "/data_quality.py" -%}
+
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/{{ pipeline_name }}')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "description": "{{ pipeline_description }}",
+                "activities": [
+                    {
+                        "name": "process_data",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "automated_test_flag",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "1:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "{{ process_data_python_path }}",
+                            "parameters": [
+                                "@variables('run_id')",
+                                "@string(variables('automated_test_flag'))"
+                            ],
+                            "libraries": [
+                                {
+                                    "whl": "dbfs:/FileStore/jars/datastacks-latest-py3-none-any.whl"
+                                }
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "ls_Databricks_Small",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "data_quality",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "process_data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "1:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "{{ data_quality_python_path }}",
+                            "parameters": [
+                                "@variables('run_id')",
+                                "@string(variables('automated_test_flag'))"
+                            ],
+                            "libraries": [
+                                {
+                                    "whl": "dbfs:/FileStore/jars/datastacks-latest-py3-none-any.whl"
+                                }
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "ls_Databricks_Small",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "run_id",
+                        "type": "SetVariable",
+                        "dependsOn": [],
+                        "policy": {
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "variableName": "run_id",
+                            "value": {
+                                "value": "@{if(or(empty(pipeline().parameters.run_id),equals(pipeline().parameters.run_id, 'auto')), pipeline().RunId, pipeline().parameters.run_id)}",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    {
+                        "name": "automated_test_flag",
+                        "type": "SetVariable",
+                        "dependsOn": [
+                            {
+                                "activity": "run_id",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "variableName": "automated_test_flag",
+                            "value": {
+                                "value": "@startswith(variables('run_id'), pipeline().parameters.automated_test_prefix)",
+                                "type": "Expression"
+                            }
+                        }
+                    }
+                ],
+                "parameters": {
+                    "run_id": {
+                        "type": "string",
+                        "defaultValue": "auto"
+                    },
+                    "automated_test_prefix": {
+                        "type": "string",
+                        "defaultValue": "automated_test_"
+                    }
+                },
+                "variables": {
+                    "automated_test_flag": {
+                        "type": "Boolean"
+                    },
+                    "run_id": {
+                        "type": "String"
+                    }
+                },
+                "folder": {
+                    "name": "Process"
+                },
+                "annotations": []
+            }
+        }
+    ]
+}
