@@ -5,7 +5,7 @@ TEST_CONFIG_INGEST_OVERWRITE = TEST_CONFIG_DIRECTORY + "test_config_ingest_overw
 EXPECTED_FILE_LIST = [
     "config/ingest_sources/ingest_config.json",
     "config/schema/ingest_config_schema.json",
-    "data_factory/pipelines/ARM_IngestTemplate.json",
+    "data_factory/pipelines/arm_template.json",
     "data_factory/adf_datasets.tf",
     "data_factory/adf_linked_services.tf",
     "data_factory/adf_pipelines.tf",
@@ -25,9 +25,9 @@ EXPECTED_FILE_LIST = [
 ]
 
 EXPECTED_DQ_FILE_LIST = [
-    "config/data_quality/ingest_dq.json",
-    "data_factory/pipelines/ARM_IngestTemplate.json",
-    "spark_jobs/ingest_dq.py",
+    "config/data_quality/data_quality_config.json",
+    "data_factory/pipelines/arm_template.json",
+    "spark_jobs/data_quality.py",
     "de-ingest-ado-pipeline.yml",
     "README.md",
 ]

@@ -88,7 +88,7 @@ def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, ov
     for file_path in EXPECTED_FILE_LIST:
         assert Path(f"{target_dir}/{file_path}").exists()
 
-    with open(f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json") as file:
+    with open(f"{target_dir}/data_factory/pipelines/arm_template.json") as file:
         arm_template_dict = json.load(file)
     assert arm_template_dict["resources"][0]["properties"]["description"] == "Pipeline for testing"
 
@@ -97,7 +97,7 @@ def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, ov
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST_OVERWRITE, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    with open(f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json") as file:
+    with open(f"{target_dir}/data_factory/pipelines/arm_template.json") as file:
         arm_template_dict = json.load(file)
     assert arm_template_dict["resources"][0]["properties"]["description"] == expected_desc
 
@@ -111,7 +111,7 @@ def test_enum_templating(mock_target_dir, mock_confirm, tmp_path):
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    tested_file_path = f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json"
+    tested_file_path = f"{target_dir}/data_factory/pipelines/arm_template.json"
 
     assert Path(f"{tested_file_path}").exists()
 
