@@ -21,7 +21,7 @@ def azure_blob_service_client():
 def test_upload_file_to_blob(mock_azure_blob_service_client):
     container_name = TEST_CONTAINER
     target_dir = TEST_DIRECTORY
-    config_file_path = "datastacks/tests/data/ingest_sources/test_config.json"
+    config_file_path = "tests/data/ingest_sources/test_config.json"
     expected_target_blob = f"{TEST_DIRECTORY}/test_config.json"
     overwrite = False
 

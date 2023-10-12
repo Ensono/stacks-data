@@ -34,7 +34,7 @@ def test_render_template_components(tmp_path):
     }
     config = IngestWorkloadConfigModel(**config_dict)
 
-    template_source_path = "datastacks/datastacks/generate/templates/ingest/Ingest_SourceType_SourceName/"
+    template_source_path = "stacks/data/generate/templates/ingest/Ingest_SourceType_SourceName/"
     target_dir = f"{tmp_path}/test_render"
 
     render_template_components(config, template_source_path, target_dir)
