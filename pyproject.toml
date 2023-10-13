@@ -1,16 +1,20 @@
 [tool.poetry]
 name = "stacks-data"
-version = "0.1.0"
+version = "0.1.1"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Andy Durkan <andy.durkan@ensono.com>",
     "Paulina Motyl <paulina.motyl@ensono.com>",
 ]
 readme = "README.md"
-
+homepage = "https://github.com/Ensono/stacks-data"
 packages = [
     { include = "stacks" },
 ]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -30,9 +34,6 @@ pydantic = "^1.10.12"
 delta-spark = "^2.4.0"
 behave = "^1.2.6"
 
-[tool.poetry.scripts]
-datastacks = "stacks.data.cli.datastacks_cli:cli"
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.1"
 black = "^23.1.0"
@@ -44,9 +45,8 @@ tomli = "^2.0.1"
 pytest-mock = "^3.11.1"
 coverage = "^7.3.2"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.scripts]
+datastacks = "stacks.data.cli.datastacks_cli:cli"
 
 [tool.pytest.ini_options]
 log_cli = true
