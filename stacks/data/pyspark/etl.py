@@ -163,7 +163,7 @@ def get_data_factory_param(param_position: int, default_value: str | bool = None
 
     """
     if len(sys.argv) <= param_position:
-        logging.warning("Excepted arguments from Data Factory not found, using default value.")
+        logger.warning("Excepted arguments from Data Factory not found, using default value.")
         return default_value
     else:
         data_factory_param = sys.argv[param_position]
