@@ -270,7 +270,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/FileStore/scripts/{{ pipeline_name }}/ingest_dq.py",
+                            "pythonFile": "dbfs:/FileStore/scripts/{{ pipeline_name }}/data_quality.py",
                             "parameters": [
                                 "@variables('run_id')",
                                 "@string(variables('automated_test_flag'))",
@@ -278,7 +278,9 @@
                             ],
                             "libraries": [
                                 {
-                                    "whl": "dbfs:/FileStore/jars/datastacks-latest-py3-none-any.whl"
+                                    "pypi": {
+                                        "package": "stacks-data"
+                                    }
                                 }
                             ]
                         },

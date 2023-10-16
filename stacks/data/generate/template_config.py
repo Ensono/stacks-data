@@ -74,7 +74,7 @@ class IngestWorkloadConfigModel(WorkloadConfigBaseModel):
     """Pydantic definitions for data ingest workload generation config."""
 
     workload_type: Literal["Ingest"] = "Ingest"
-    template_source_folder: Literal["Ingest_SourceType_SourceName"] = "Ingest_SourceType_SourceName"
+    template_source_folder: Literal["ingest_template"] = "ingest_template"
 
     bronze_container: str = Field(default="raw", description="Name of container for Bronze data.")
 

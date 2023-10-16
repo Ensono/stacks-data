@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from stacks.data.generate.template_config import IngestWorkloadConfigModel
+from stacks.data.generate.template_config import IngestWorkloadConfigModel, ProcessingWorkloadConfigModel
 from stacks.data.generate.data_workloads import (
     validate_yaml_config,
     generate_pipeline,
@@ -15,8 +15,11 @@ from stacks.data.generate.data_workloads import (
 from tests.unit.generate.conftest import (
     TEST_CONFIG_INGEST,
     TEST_CONFIG_INGEST_OVERWRITE,
-    EXPECTED_FILE_LIST,
-    EXPECTED_DQ_FILE_LIST,
+    TEST_CONFIG_PROCESS,
+    INGEST_EXPECTED_FILES,
+    INGEST_DQ_FILES,
+    PROCESS_EXPECTED_FILES,
+    PROCESS_DQ_FILES,
 )
 
 
@@ -34,25 +37,41 @@ def test_render_template_components(tmp_path):
     }
     config = IngestWorkloadConfigModel(**config_dict)
 
-    template_source_path = "stacks/data/generate/templates/ingest/Ingest_SourceType_SourceName/"
+    template_source_path = "templates/ingest/ingest_template/"
     target_dir = f"{tmp_path}/test_render"
 
     render_template_components(config, template_source_path, target_dir)
 
-    for file_path in EXPECTED_FILE_LIST:
+    for file_path in INGEST_EXPECTED_FILES:
         assert Path(f"{target_dir}/{file_path}").exists()
 
 
 @pytest.mark.parametrize(
-    "dq,expected_files", [(False, EXPECTED_FILE_LIST), (True, EXPECTED_FILE_LIST + EXPECTED_DQ_FILE_LIST)]
+    "dq,expected_files", [(False, INGEST_EXPECTED_FILES), (True, INGEST_EXPECTED_FILES + INGEST_DQ_FILES)]
 )
 @patch("stacks.data.generate.data_workloads.click.confirm")
 @patch("stacks.data.generate.data_workloads.generate_target_dir")
-def test_generate_pipeline(mock_target_dir, mock_confirm, tmp_path, dq, expected_files):
+def test_generate_pipeline_ingest(mock_target_dir, mock_confirm, tmp_path, dq, expected_files):
     mock_target_dir.return_value = tmp_path
     mock_confirm.return_value = True
 
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST, IngestWorkloadConfigModel)
+    target_dir = generate_pipeline(validated_config, dq)
+
+    for file_path in expected_files:
+        assert Path(f"{target_dir}/{file_path}").exists()
+
+
+@pytest.mark.parametrize(
+    "dq,expected_files", [(False, PROCESS_EXPECTED_FILES), (True, PROCESS_EXPECTED_FILES + PROCESS_DQ_FILES)]
+)
+@patch("stacks.data.generate.data_workloads.click.confirm")
+@patch("stacks.data.generate.data_workloads.generate_target_dir")
+def test_generate_pipeline_process(mock_target_dir, mock_confirm, tmp_path, dq, expected_files):
+    mock_target_dir.return_value = tmp_path
+    mock_confirm.return_value = True
+
+    validated_config = validate_yaml_config(TEST_CONFIG_PROCESS, ProcessingWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, dq)
 
     for file_path in expected_files:
@@ -69,7 +88,7 @@ def test_generate_pipeline_new_path(mock_target_dir, mock_confirm, tmp_path):
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    for file_path in EXPECTED_FILE_LIST:
+    for file_path in INGEST_EXPECTED_FILES:
         assert Path(f"{target_dir}/{file_path}").exists()
 
 
@@ -85,10 +104,10 @@ def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, ov
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    for file_path in EXPECTED_FILE_LIST:
+    for file_path in INGEST_EXPECTED_FILES:
         assert Path(f"{target_dir}/{file_path}").exists()
 
-    with open(f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json") as file:
+    with open(f"{target_dir}/data_factory/pipelines/arm_template.json") as file:
         arm_template_dict = json.load(file)
     assert arm_template_dict["resources"][0]["properties"]["description"] == "Pipeline for testing"
 
@@ -97,7 +116,7 @@ def test_generate_pipeline_overwrite(mock_target_dir, mock_confirm, tmp_path, ov
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST_OVERWRITE, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    with open(f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json") as file:
+    with open(f"{target_dir}/data_factory/pipelines/arm_template.json") as file:
         arm_template_dict = json.load(file)
     assert arm_template_dict["resources"][0]["properties"]["description"] == expected_desc
 
@@ -111,7 +130,7 @@ def test_enum_templating(mock_target_dir, mock_confirm, tmp_path):
     validated_config = validate_yaml_config(TEST_CONFIG_INGEST, IngestWorkloadConfigModel)
     target_dir = generate_pipeline(validated_config, False)
 
-    tested_file_path = f"{target_dir}/data_factory/pipelines/ARM_IngestTemplate.json"
+    tested_file_path = f"{target_dir}/data_factory/pipelines/arm_template.json"
 
     assert Path(f"{tested_file_path}").exists()
 
