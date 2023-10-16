@@ -10,6 +10,8 @@ import re
 from collections import Counter
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 
 def find_placeholders(input_str: str) -> list[str]:
     """Finds all placeholders in the form {PLACEHOLDER} in the input string.
@@ -83,7 +85,7 @@ def config_uniqueness_check(config_list: list[dict], unique_key: str):
     key_counter = Counter(i[unique_key] for i in config_list)
     duplicates = [key for key, count in key_counter.items() if count > 1]
     if duplicates:
-        logging.error(f"{unique_key} values are not unique: {', '.join(map(str, duplicates))}")
+        logger.error(f"{unique_key} values are not unique: {', '.join(map(str, duplicates))}")
         return False
     return True
 
