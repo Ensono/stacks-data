@@ -1,0 +1,90 @@
+{
+    "type": "object",
+    "properties": {
+        "gx_directory_path": {
+            "type": "string",
+            "minLength": 3
+        },
+        "dataset_name": {
+            "type": "string",
+            "minLength": 3
+        },
+        "dq_input_path": {
+            "type": "string",
+            "minLength": 3
+        },
+        "dq_output_path": {
+            "type": "string",
+            "minLength": 3
+        },
+        "datasource_config": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "datasource_name": {
+                        "type": "string"
+                    },
+                    "datasource_type": {
+                        "type": "string"
+                    },
+                    "data_location": {
+                        "type": "string"
+                    },
+                    "expectation_suite_name": {
+                        "type": "string"
+                    },
+                    "validation_config": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "column_name": {
+                                    "type": "string"
+                                },
+                                "expectations": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "expectation_type": {
+                                                "type": "string"
+                                            },
+                                            "expectation_kwargs": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "required": [
+                                            "expectation_type",
+                                            "expectation_kwargs"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "column_name",
+                                "expectations"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "datasource_name",
+                    "datasource_type",
+                    "data_location",
+                    "expectation_suite_name",
+                    "validation_config"
+                ],
+                "minItems": 1
+            }
+        }
+    },
+    "required": [
+        "gx_directory_path",
+        "dataset_name",
+        "dq_input_path",
+        "dq_output_path",
+        "datasource_config"
+    ],
+    "additionalProperties": false
+}
