@@ -6,9 +6,12 @@ rendering templates based on the provided config, and writing out the rendered t
 import click
 
 from stacks.data.generate.template_config import WorkloadConfigBaseModel
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, PackageLoader
 from pathlib import Path
 from typing import Type
+
+GENERATE_PACKAGE_NAME = "stacks.data.generate"
+TEMPLATES_DIRECTORY = "templates"
 
 
 def generate_target_dir(workload_type: str, name: str) -> str:
@@ -38,7 +41,7 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         target_dir: Directory to render templates into
     """
     Path(target_dir).mkdir(parents=True, exist_ok=True)
-    template_loader = FileSystemLoader(searchpath=str(Path(template_source_path).absolute()))
+    template_loader = PackageLoader(GENERATE_PACKAGE_NAME, template_source_path)
     template_env = Environment(loader=template_loader, autoescape=True, keep_trailing_newline=True)
 
     template_list = template_env.list_templates(extensions=".jinja")
@@ -81,8 +84,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
         Path to rendered template
     """
     workload_type = validated_config.workload_type.lower()
-    templates_directory = "stacks/data/generate/templates"
-    template_source_path = f"{templates_directory}/{workload_type}/{validated_config.template_source_folder}/"
+    template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
     if Path(f"{target_dir}").exists():
@@ -102,7 +104,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     render_template_components(validated_config, template_source_path, target_dir)
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
-        template_source_path = f"{templates_directory}/{workload_type}/{template_source_folder}/"
+        template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{template_source_folder}/"
         render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
