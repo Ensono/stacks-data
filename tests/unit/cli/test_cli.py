@@ -49,12 +49,13 @@ def test_cli(function, config, dq_opt):
 )
 def test_cli_invalid(function, config, dq_opt):
     runner = CliRunner()
+    test_config_file = "test_config.yml"
     with open(config, "r") as file:
         config_dict = yaml.safe_load(file)
 
     with runner.isolated_filesystem():
-        with open("test_config_ingest.yml", "w") as f:
+        with open(test_config_file, "w") as f:
             f.write(yaml.dump(config_dict))
 
-        result = runner.invoke(function, ["--config", "test_config_ingest.yml", dq_opt])
+        result = runner.invoke(function, ["--config", test_config_file, dq_opt])
         assert isinstance(result.exception, ValidationError)
