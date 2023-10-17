@@ -124,8 +124,7 @@ def load_configs_as_list(path: str) -> list[dict]:
 def get_latest_package_version(package_name: str) -> str:
     """Retrieve the latest version of a package from PyPI (Python Package Index).
 
-    This function makes a HTTP request to PyPI to fetch metadata about the specified package,
-    and returns its latest version.
+    Makes a HTTP request to PyPI to fetch metadata about the specified package, and returns its latest version.
 
     Args:
         package_name (str): A PyPI package name.
