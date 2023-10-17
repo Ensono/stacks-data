@@ -6,9 +6,11 @@ import json
 import logging
 import os
 import re
+import requests
 
 from collections import Counter
 from pathlib import Path
+from requests.exceptions import RequestException
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +71,6 @@ def camel_to_snake(camel_str: str) -> str:
 
     Returns:
         The string converted to snake_case format.
-
     """
     snake_str = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", camel_str)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", snake_str).lower()
@@ -118,3 +119,29 @@ def load_configs_as_list(path: str) -> list[dict]:
         with open(file) as f:
             config_list.append(json.load(f))
     return config_list
+
+
+def get_latest_package_version(package_name: str) -> str:
+    """Retrieve the latest version of a package from PyPI (Python Package Index).
+
+    This function makes a HTTP request to PyPI to fetch metadata about the specified package,
+    and returns its latest version.
+
+    Args:
+        package_name (str): A PyPI package name.
+
+    Returns:
+        str: The latest version of the package found on PyPI.
+
+    Raises:
+        RequestException: If there is an error during the HTTP request to PyPI.
+    """
+    try:
+        response = requests.get(f"https://pypi.org/pypi/{package_name}/json")
+        response.raise_for_status()
+        data = response.json()
+        package_version = data["info"]["version"]
+        return package_version
+    except RequestException as e:
+        logger.error(f"Error fetching package versions for {package_name}: {e}")
+        raise e
