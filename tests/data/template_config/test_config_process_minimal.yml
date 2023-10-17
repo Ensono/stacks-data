@@ -1,5 +1,5 @@
 pipeline_name: test_pipeline
-pipeline_description: Pipeline for testing
+pipeline_description: Pipeline for testing process, minimal config
 ado_variable_groups_nonprod:
   - nonprod_test_group
 ado_variable_groups_prod:
