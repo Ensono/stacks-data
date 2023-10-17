@@ -9,4 +9,4 @@ ado_variable_groups_nonprod:
 ado_variable_groups_prod:
   - prod_group
 bronze_container: test_raw
-stacks_data_library_version: invalid
+stacks_data_package_version: invalid

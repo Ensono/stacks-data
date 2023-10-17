@@ -57,9 +57,9 @@ class WorkloadConfigBaseModel(BaseModel, ABC):
     default_arm_deployment_mode: Optional[str] = Field(
         default="Incremental", description="Deployment mode for terraform."
     )
-    stacks_data_library_version: str = Field(
+    stacks_data_package_version: str = Field(
         default=get_latest_package_version("stacks-data"),
-        description="Version of the stacks-data Python library to use on the job cluster, e.g. 0.3.0.",
+        description="Version of the stacks-data Python package to use on the job cluster, e.g. 0.3.0.",
         regex=r"\d+\.\d+\.\d+.*",
     )
 

@@ -39,7 +39,7 @@ def test_render_template_components(tmp_path):
         "ado_variable_groups_nonprod": ["nonprod_test_group"],
         "ado_variable_groups_prod": ["prod_group"],
         "bronze_container": "test_raw",
-        "stacks_data_library_version": "0.1.2",
+        "stacks_data_package_version": "0.1.2",
     }
     config = IngestWorkloadConfigModel(**config_dict)
 
