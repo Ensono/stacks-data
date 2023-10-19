@@ -1,6 +1,7 @@
-from unittest.mock import patch
-
 import pytest
+
+from requests.exceptions import RequestException
+from unittest.mock import Mock, patch
 
 from stacks.data.utils import (
     filter_files_by_extension,
@@ -8,6 +9,7 @@ from stacks.data.utils import (
     substitute_env_vars,
     camel_to_snake,
     config_uniqueness_check,
+    get_latest_package_version,
 )
 
 TEST_ENV_VARS = {"TEST_VAR1": "value1", "TEST_VAR2": "value2", "ADLS_ACCOUNT": "value3"}
@@ -102,3 +104,21 @@ def test_camel_to_snake(input_str, expected_output):
 def test_config_uniqueness_check(config_list, unique_key, expected_output):
     result = config_uniqueness_check(config_list, unique_key)
     assert result == expected_output
+
+
+def test_get_latest_package_version():
+    package_name = "test-package"
+    package_json = {"info": {"name": "test-package", "version": "3.2.1"}}
+    mock_response = Mock()
+    mock_response.json.return_value = package_json
+    mock_response.raise_for_status.return_value = None
+    with patch("requests.get", return_value=mock_response):
+        latest_version = get_latest_package_version(package_name)
+    assert latest_version == "3.2.1"
+
+
+def test_get_latest_package_version_invalid_package():
+    package_name = "non-existent-package"
+    with patch("requests.get", side_effect=RequestException("RequestException")):
+        with pytest.raises(RequestException):
+            get_latest_package_version(package_name)
