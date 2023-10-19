@@ -1,10 +1,9 @@
 [tool.poetry]
 name = "stacks-data"
-version = "0.3.0"
+version = "0.3.1"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
-    "Andy Durkan <andy.durkan@ensono.com>",
-    "Paulina Motyl <paulina.motyl@ensono.com>",
+    "Ensono Stacks <stacks@ensono.com>"
 ]
 readme = "README.md"
 homepage = "https://github.com/Ensono/stacks-data"
