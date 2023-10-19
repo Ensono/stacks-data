@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 import yaml
 from abc import ABC, abstractmethod
 
+from stacks.data.utils import get_latest_package_version
+
 
 class DataSourceType(Enum):
     """Enum containing supported data source types."""
@@ -54,6 +56,11 @@ class WorkloadConfigBaseModel(BaseModel, ABC):
     )
     default_arm_deployment_mode: Optional[str] = Field(
         default="Incremental", description="Deployment mode for terraform."
+    )
+    stacks_data_package_version: str = Field(
+        default=get_latest_package_version("stacks-data"),
+        description="Version of the stacks-data Python package to use on the job cluster, e.g. 0.3.0.",
+        regex=r"\d+\.\d+\.\d+.*",
     )
 
     @classmethod

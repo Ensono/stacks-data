@@ -1,5 +1,5 @@
 dataset_name: test_dataset
-pipeline_description: Pipeline for testing
+pipeline_description: Pipeline for testing ingest, invalid config
 data_source_type: azure_sql
 key_vault_linked_service_name: test_keyvault
 data_source_password_key_vault_secret_name: test_password
@@ -9,3 +9,4 @@ ado_variable_groups_nonprod:
 ado_variable_groups_prod:
   - prod_group
 bronze_container: test_raw
+stacks_data_package_version: invalid
