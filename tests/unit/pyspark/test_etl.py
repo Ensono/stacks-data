@@ -1,5 +1,4 @@
 import os
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,7 +10,6 @@ from stacks.data.pyspark.etl import (
     read_latest_rundate_data,
     save_files_as_delta_tables,
     transform_and_save_as_delta,
-    get_data_factory_param,
 )
 
 
@@ -140,27 +138,3 @@ def test_transform_and_save_as_delta(spark, tmp_path):
     assert len(rows) == 2
     assert rows[0].NewCol == 2
     assert rows[1].NewCol == 3
-
-
-def test_get_data_factory_param():
-    with patch.object(sys, "argv", ["script.py", "test_value"]):
-        result = get_data_factory_param(1, "default_value")
-        assert result == "test_value"
-
-
-def test_get_data_factory_param_default():
-    with patch.object(sys, "argv", ["script.py"]):
-        result = get_data_factory_param(1, "default_value")
-        assert result == "default_value"
-
-
-def test_get_data_factory_param_bool():
-    with patch.object(sys, "argv", ["script.py", "True"]):
-        result = get_data_factory_param(1, default_value=False, convert_bool=True)
-        assert result is True
-
-
-def test_get_data_factory_param_bool_false():
-    with patch.object(sys, "argv", ["script.py", "False"]):
-        result = get_data_factory_param(1, default_value=True, convert_bool=True)
-        assert result is False

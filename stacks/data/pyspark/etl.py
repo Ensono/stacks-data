@@ -5,7 +5,6 @@ designed to simplify complex operations, these functions streamline the transfor
 layers, such as Bronze-to-Silver or Silver-to-Gold.
 """
 import logging
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -148,29 +147,3 @@ def transform_and_save_as_delta(
     adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     output_filepath = adls_client.get_adls_file_url(target_container, output_file_name)
     save_dataframe_as_delta(spark, transformed_df, output_filepath, overwrite, merge_keys)
-
-
-def get_data_factory_param(param_position: int, default_value: str | bool = None, convert_bool: bool = False):
-    """Gets parameters passed from Data Factory Python activities.
-
-    The values held in the parameters are expected to be strings - the convert_bool argument can be used to convert
-    strings back to bool type (where the string "True" will return True).
-
-    Args:
-        param_position: The ordinal position of the parameter passed to the Python activity.
-        default_value: Default value to return if the parameter is not found.
-        convert_bool: Convert the parameter to a bool based on string value of "True".
-
-    Returns:
-        The parameter value passed from Data Factory (via sys.argv) or the default parameter value.
-
-    """
-    if len(sys.argv) <= param_position:
-        logger.warning("Excepted arguments from Data Factory not found, using default value.")
-        return default_value
-    else:
-        data_factory_param = sys.argv[param_position]
-        if convert_bool:
-            return data_factory_param == "True"
-        else:
-            return data_factory_param
