@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class AdlsClient:
-    def __init__(self, account_name):
+    def __init__(self, storage_account_name: str):
         """Initiate a new ADLS Client.
 
         Args:
-            account_name: Name of the storage account
+            storage_account_name: Name of the storage account
         """
-        self.account_name = account_name
-        self.account_url = f"https://{account_name}.dfs.core.windows.net"
+        self.storage_account_name = storage_account_name
+        self.account_url = f"https://{storage_account_name}.dfs.core.windows.net"
         self.credential = DefaultAzureCredential()
         self.adls_client = DataLakeServiceClient(account_url=self.account_url, credential=self.credential)
 
@@ -124,4 +124,4 @@ class AdlsClient:
         Returns:
             Full ADLS URL for the specified file.
         """
-        return f"abfss://{container}@{self.account_name}.dfs.core.windows.net/{file_name}"
+        return f"abfss://{container}@{self.storage_account_name}.dfs.core.windows.net/{file_name}"
