@@ -1,21 +1,23 @@
 """Helper functions for interacting with Azure Data Lake Storage and Azure Blob Storage."""
+
 import json
 import logging
 import os
-from typing import Optional
 
-from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
-from azure.storage.filedatalake import DataLakeServiceClient
+from azure.identity import DefaultAzureCredential
 from pyspark.sql import SparkSession
 
-logger = logging.getLogger(__name__)
+from stacks.data.constants import (
+    AZURE_TENANT_ID,
+    AZURE_CLIENT_ID,
+    AZURE_CLIENT_SECRET,
+    AZURE_STORAGE_ACCOUNT_NAME,
+    AZURE_CONFIG_ACCOUNT_NAME,
+)
 
-ENV_NAME_SERVICE_PRINCIPAL_SECRET = "AZURE_CLIENT_SECRET"
-ENV_NAME_DIRECTORY_ID = "AZURE_TENANT_ID"
-ENV_NAME_APPLICATION_ID = "AZURE_CLIENT_ID"
-ENV_NAME_ADLS_ACCOUNT = "ADLS_ACCOUNT"
-ENV_NAME_BLOB_ACCOUNT = "BLOB_ACCOUNT"
+
+logger = logging.getLogger(__name__)
 
 
 def check_env() -> None:
@@ -25,14 +27,14 @@ def check_env() -> None:
         EnvironmentError: If any of the required environment variables are not set.
     """
     required_variables = [
-        ENV_NAME_SERVICE_PRINCIPAL_SECRET,
-        ENV_NAME_DIRECTORY_ID,
-        ENV_NAME_APPLICATION_ID,
-        ENV_NAME_ADLS_ACCOUNT,
-        ENV_NAME_BLOB_ACCOUNT,
+        "AZURE_TENANT_ID",
+        "AZURE_CLIENT_ID",
+        "AZURE_CLIENT_SECRET",
+        "AZURE_STORAGE_ACCOUNT_NAME",
+        "AZURE_CONFIG_ACCOUNT_NAME",
     ]
 
-    missing_variables = [var for var in required_variables if var not in os.environ]
+    missing_variables = [var_name for var_name in required_variables if os.environ.get(var_name) is None]
 
     if missing_variables:
         raise EnvironmentError("The following environment variables are not set: " + ", ".join(missing_variables))
@@ -44,46 +46,23 @@ def set_spark_properties(spark: SparkSession) -> None:
     Args:
         spark: Spark session.
     """
-    adls_account = os.getenv(ENV_NAME_ADLS_ACCOUNT)
-    spark.conf.set(f"fs.azure.account.auth.type.{adls_account}.dfs.core.windows.net", "OAuth")
+    spark.conf.set(f"fs.azure.account.auth.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net", "OAuth")
     spark.conf.set(
-        f"fs.azure.account.oauth.provider.type.{adls_account}.dfs.core.windows.net",
+        f"fs.azure.account.oauth.provider.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
         "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
     )
     spark.conf.set(
-        f"fs.azure.account.oauth2.client.id.{adls_account}.dfs.core.windows.net",
-        os.getenv(ENV_NAME_APPLICATION_ID),
+        f"fs.azure.account.oauth2.client.id.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+        AZURE_CLIENT_ID,
     )
     spark.conf.set(
-        f"fs.azure.account.oauth2.client.secret.{adls_account}.dfs.core.windows.net",
-        os.getenv(ENV_NAME_SERVICE_PRINCIPAL_SECRET),
+        f"fs.azure.account.oauth2.client.secret.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+        AZURE_CLIENT_SECRET,
     )
     spark.conf.set(
-        f"fs.azure.account.oauth2.client.endpoint.{adls_account}.dfs.core.windows.net",
-        f"https://login.microsoftonline.com/{os.getenv(ENV_NAME_DIRECTORY_ID)}/oauth2/token",
+        f"fs.azure.account.oauth2.client.endpoint.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+        f"https://login.microsoftonline.com/{AZURE_TENANT_ID}/oauth2/token",
     )
-
-
-def get_adls_directory_contents(container: str, path: str, recursive: Optional[bool] = True) -> list[str]:
-    """Gets the contents of a specified directory in an Azure Data Lake Storage container.
-
-    Args:
-        container: The name of the container in the ADLS account.
-        path: The directory path within the container for which to list contents.
-        recursive: If True, lists contents of all subdirectories recursively.
-
-    Returns:
-        A list of paths for the files and subdirectories within the specified container.
-    """
-    adls_account = os.getenv(ENV_NAME_ADLS_ACCOUNT)
-    adls_url = f"https://{adls_account}.dfs.core.windows.net"
-    adls_client = DataLakeServiceClient(account_url=adls_url, credential=DefaultAzureCredential())
-    file_system_client = adls_client.get_file_system_client(file_system=container)
-
-    paths = file_system_client.get_paths(path=path, recursive=recursive)
-    paths = [path.name for path in paths]
-    logger.debug(f"ADLS directory contents: {paths}")
-    return paths
 
 
 def load_json_from_blob(container: str, file_path: str) -> dict:
@@ -108,20 +87,6 @@ def load_json_from_blob(container: str, file_path: str) -> dict:
     return json.loads(blob_content)
 
 
-def get_adls_file_url(container: str, file_name: str) -> str:
-    """Constructs an Azure Data Lake Storage (ADLS) URL for a specific file.
-
-    Args:
-        container: The name of the ADLS container.
-        file_name: The name of the file (including any subdirectories within the container).
-
-    Returns:
-        Full ADLS URL for the specified file.
-    """
-    adls_account = os.getenv(ENV_NAME_ADLS_ACCOUNT)
-    return f"abfss://{container}@{adls_account}.dfs.core.windows.net/{file_name}"
-
-
 def get_blob_url() -> str:
     """Constructs the URL for a Blob storage account on Azure.
 
@@ -130,5 +95,4 @@ def get_blob_url() -> str:
     Returns:
         The URL for the Blob service.
     """
-    blob_account = os.getenv(ENV_NAME_BLOB_ACCOUNT)
-    return f"https://{blob_account}.blob.core.windows.net"
+    return f"https://{AZURE_CONFIG_ACCOUNT_NAME}.blob.core.windows.net"

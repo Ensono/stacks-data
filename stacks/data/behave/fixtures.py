@@ -8,16 +8,15 @@ from os import listdir
 from os.path import isfile, join
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
-from azure.storage.filedatalake import DataLakeServiceClient
 from behave import fixture
 from behave.runner import Context
 from stacks.data.constants import (
-    ADLS_URL,
+    AZURE_STORAGE_ACCOUNT_NAME,
     CONFIG_CONTAINER_NAME,
     CONFIG_BLOB_URL,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.data.azure.adls import filter_directory_paths_adls, delete_directories_adls
+from stacks.data.azure.adls import AdlsClient
 from stacks.data.azure.blob import delete_blob_prefix, upload_file_to_blob
 
 logger = logging.getLogger(__name__)
@@ -33,30 +32,27 @@ def azure_adls_clean_up(context: Context, container_name: str, ingest_directory_
         ingest_directory_name: Name of the ADLS directory to delete.
 
     """
-    credential = DefaultAzureCredential()
-    adls_client = DataLakeServiceClient(account_url=ADLS_URL, credential=credential)
+    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     logger.info("BEFORE SCENARIO: Deleting any existing test output data.")
-    automated_test_output_directory_paths = filter_directory_paths_adls(
-        adls_client,
+    automated_test_output_directory_paths = adls_client.filter_directory_paths_adls(
         container_name,
         ingest_directory_name,
         AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
     )
 
-    delete_directories_adls(adls_client, container_name, automated_test_output_directory_paths)
+    adls_client.delete_directories_adls(container_name, automated_test_output_directory_paths)
 
     yield context
 
     logger.info("AFTER SCENARIO: Deleting automated test output data.")
 
-    automated_test_output_directory_paths = filter_directory_paths_adls(
-        adls_client,
+    automated_test_output_directory_paths = adls_client.filter_directory_paths_adls(
         container_name,
         ingest_directory_name,
         AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
     )
 
-    delete_directories_adls(adls_client, container_name, automated_test_output_directory_paths)
+    adls_client.delete_directories_adls(container_name, automated_test_output_directory_paths)
 
 
 @fixture

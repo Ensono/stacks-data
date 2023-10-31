@@ -10,12 +10,11 @@ from datetime import datetime
 import polling2
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
-from azure.storage.filedatalake import DataLakeServiceClient
 from behave import given, step, then
 from behave.runner import Context
 
 from stacks.data.constants import (
-    ADLS_URL,
+    AZURE_STORAGE_ACCOUNT_NAME,
     AZURE_SUBSCRIPTION_ID,
     AZURE_DATA_FACTORY_NAME,
     AZURE_RESOURCE_GROUP_NAME,
@@ -26,11 +25,11 @@ from stacks.data.azure.data_factory import (
     get_adf_pipeline_run,
     create_adf_pipeline_run,
 )
-from stacks.data.azure.adls import all_files_present_in_adls
+from stacks.data.azure.adls import AdlsClient
 
 credential = DefaultAzureCredential()
 adf_client = DataFactoryManagementClient(credential, AZURE_SUBSCRIPTION_ID)
-adls_client = DataLakeServiceClient(account_url=ADLS_URL, credential=credential)
+adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
 
 
 @given("the ADF pipeline {pipeline_name} has been triggered with {parameters}")
@@ -107,7 +106,7 @@ def check_all_files_present_in_adls(context: Context, output_files: str, contain
     """
     expected_files_list = json.loads(output_files)
     test_directory_name = f"{directory_name}/automated_tests/{context.test_run_id}"
-    assert all_files_present_in_adls(adls_client, container_name, test_directory_name, expected_files_list)
+    assert adls_client.all_files_present_in_adls(container_name, test_directory_name, expected_files_list)
 
 
 @step("the ADF pipeline {pipeline_name} completed in less than {seconds} seconds")

@@ -13,11 +13,11 @@ from typing import Any, Callable, Optional
 from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
+from stacks.data.azure.adls import AdlsClient
+from stacks.data.constants import AZURE_STORAGE_ACCOUNT_NAME
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
 from stacks.data.pyspark.storage_utils import (
     check_env,
-    get_adls_directory_contents,
-    get_adls_file_url,
     set_spark_properties,
 )
 
@@ -53,11 +53,12 @@ def save_files_as_delta_tables(
         spark_read_options: Options to pass to the DataFrameReader.
     """
     logger.info("Saving input files as delta tables...")
+    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     for file in input_files:
-        filepath = get_adls_file_url(source_container, file)
+        filepath = adls_client.get_adls_file_url(source_container, file)
         df = read_datasource(spark, filepath, datasource_type, spark_read_options)
         filename_with_no_extension = Path(filepath).stem
-        output_filepath = get_adls_file_url(target_container, filename_with_no_extension)
+        output_filepath = adls_client.get_adls_file_url(target_container, filename_with_no_extension)
         save_dataframe_as_delta(spark, df, output_filepath)
 
 
@@ -112,12 +113,13 @@ def read_latest_rundate_data(
     logger.info(f"Reading dataset: {datasource_path}")
     dirname_prefix = "rundate="
     metadata_columns = ["meta_ingestion_datetime", "meta_ingestion_pipeline", "meta_ingestion_run_id"]
-    directories = get_adls_directory_contents(container_name, datasource_path, recursive=False)
+    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
+    directories = adls_client.get_adls_directory_contents(container_name, datasource_path, recursive=False)
     rundates = [directory.split(dirname_prefix)[1] for directory in directories]
     most_recent_rundate = max(rundates, key=isoparse)
     logger.info(f"Latest rundate: {most_recent_rundate}")
     latest_path = Path(datasource_path) / (dirname_prefix + most_recent_rundate)
-    dataset_url = get_adls_file_url(container_name, str(latest_path))
+    dataset_url = adls_client.get_adls_file_url(container_name, str(latest_path))
     return read_datasource(spark, dataset_url, datasource_type, spark_read_options).drop(*metadata_columns)
 
 
@@ -143,7 +145,8 @@ def transform_and_save_as_delta(
 
     """
     transformed_df = transform_func(input_df)
-    output_filepath = get_adls_file_url(target_container, output_file_name)
+    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
+    output_filepath = adls_client.get_adls_file_url(target_container, output_file_name)
     save_dataframe_as_delta(spark, transformed_df, output_filepath, overwrite, merge_keys)
 
 
