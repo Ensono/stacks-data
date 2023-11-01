@@ -5,6 +5,7 @@ designed to simplify complex operations, these functions streamline the transfor
 layers, such as Bronze-to-Silver or Silver-to-Gold.
 """
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -13,11 +14,12 @@ from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
 from stacks.data.azure.adls import AdlsClient
-from stacks.data.constants import AZURE_STORAGE_ACCOUNT_NAME
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
-from stacks.data.pyspark.storage_utils import (
-    check_env,
-    set_spark_properties,
+from stacks.data.constants import (
+    AZURE_TENANT_ID,
+    AZURE_CLIENT_ID,
+    AZURE_CLIENT_SECRET,
+    AZURE_STORAGE_ACCOUNT_NAME,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,8 +31,88 @@ class TableTransformation:
     transformation_function: Callable[[DataFrame], DataFrame]
 
 
+class EtlSession:
+    def __init__(
+        self, app_name: str, spark_config: dict[str, Any] = None, storage_account_name: str = AZURE_STORAGE_ACCOUNT_NAME
+    ):
+        """Initiate a Spark session with a configured ADLS Client.
+
+        Args:
+            app_name: Name of the Spark application.
+            spark_config: A dictionary with additional Spark configuration options to set.
+            storage_account_name: ADLS storage account name.
+        """
+        self.app_name = app_name
+        self.spark_config = spark_config
+        self.spark_session = self.get_spark_session_for_adls()
+        self.adls_client = AdlsClient(storage_account_name)
+
+    def get_spark_session_for_adls(self) -> SparkSession:
+        """Retrieve a SparkSession configured for Azure Data Lake Storage access.
+
+        This function first checks that the required environment variables for ADLS are set. If they are, it then gets
+        (or creates) a SparkSession and configures its properties to allow for ADLS access using the set environment
+        variables.
+
+        Returns:
+            Configured Spark session for ADLS access.
+
+        Raises:
+            EnvironmentError: If any of the required environment variables for ADLS access are not set.
+
+        """
+        self.check_env()
+        spark = get_spark_session(self.app_name, self.spark_config)
+        self.set_spark_properties(spark)
+        return spark
+
+    def check_env(self) -> None:
+        """Checks if the environment variables for ADLS and Blob access are set.
+
+        Raises:
+            EnvironmentError: If any of the required environment variables are not set.
+        """
+        required_variables = [
+            "AZURE_TENANT_ID",
+            "AZURE_CLIENT_ID",
+            "AZURE_CLIENT_SECRET",
+            "AZURE_STORAGE_ACCOUNT_NAME",
+            "AZURE_CONFIG_ACCOUNT_NAME",
+        ]
+
+        missing_variables = [var_name for var_name in required_variables if os.environ.get(var_name) is None]
+
+        if missing_variables:
+            raise EnvironmentError("The following environment variables are not set: " + ", ".join(missing_variables))
+
+    def set_spark_properties(spark: SparkSession) -> None:
+        """Sets Spark properties to configure Azure credentials to access Data Lake storage.
+
+        Args:
+            spark: Spark session.
+        """
+        spark.conf.set(f"fs.azure.account.auth.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net", "OAuth")
+        spark.conf.set(
+            f"fs.azure.account.oauth.provider.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+            "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+        )
+        spark.conf.set(
+            f"fs.azure.account.oauth2.client.id.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+            AZURE_CLIENT_ID,
+        )
+        spark.conf.set(
+            f"fs.azure.account.oauth2.client.secret.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+            AZURE_CLIENT_SECRET,
+        )
+        spark.conf.set(
+            f"fs.azure.account.oauth2.client.endpoint.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
+            f"https://login.microsoftonline.com/{AZURE_TENANT_ID}/oauth2/token",
+        )
+
+
 def save_files_as_delta_tables(
     spark: SparkSession,
+    adls_client: AdlsClient,
     input_files: list[str],
     datasource_type: str,
     source_container: str,
@@ -45,6 +127,7 @@ def save_files_as_delta_tables(
 
     Args:
         spark: Spark session.
+        adls_client: ADLS Client.
         input_files: List of file paths within the bronze container to be converted into Delta tables.
         datasource_type: Source format that Spark can read from, e.g. delta, table, parquet, json, csv.
         source_container: Name of the source container in ADLS.
@@ -52,7 +135,6 @@ def save_files_as_delta_tables(
         spark_read_options: Options to pass to the DataFrameReader.
     """
     logger.info("Saving input files as delta tables...")
-    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     for file in input_files:
         filepath = adls_client.get_adls_file_url(source_container, file)
         df = read_datasource(spark, filepath, datasource_type, spark_read_options)
@@ -61,32 +143,9 @@ def save_files_as_delta_tables(
         save_dataframe_as_delta(spark, df, output_filepath)
 
 
-def get_spark_session_for_adls(app_name: str, spark_config: dict[str, Any] = None) -> SparkSession:
-    """Retrieve a SparkSession configured for Azure Data Lake Storage access.
-
-    This function first checks that the required environment variables for ADLS are set. If they are, it then gets
-    (or creates) a SparkSession and configures its properties to allow for ADLS access using the set environment
-    variables.
-
-    Args:
-        app_name: Name of the Spark application.
-        spark_config: A dictionary with additional Spark configuration options to set.
-
-    Returns:
-        Configured Spark session for ADLS access.
-
-    Raises:
-        EnvironmentError: If any of the required environment variables for ADLS access are not set.
-
-    """
-    check_env()
-    spark = get_spark_session(app_name, spark_config)
-    set_spark_properties(spark)
-    return spark
-
-
 def read_latest_rundate_data(
     spark: SparkSession,
+    adls_client: AdlsClient,
     container_name: str,
     datasource_path: str,
     datasource_type: str,
@@ -100,6 +159,7 @@ def read_latest_rundate_data(
 
     Args:
         spark: Spark session.
+        adls_client: ADLS Client.
         container_name: Name of the ADLS container.
         datasource_path: Directory path within the ADLS container where rundate directories are located.
         datasource_type: Source system type that Spark can read from, e.g. delta, table, parquet, json, csv.
@@ -112,7 +172,6 @@ def read_latest_rundate_data(
     logger.info(f"Reading dataset: {datasource_path}")
     dirname_prefix = "rundate="
     metadata_columns = ["meta_ingestion_datetime", "meta_ingestion_pipeline", "meta_ingestion_run_id"]
-    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     directories = adls_client.get_adls_directory_contents(container_name, datasource_path, recursive=False)
     rundates = [directory.split(dirname_prefix)[1] for directory in directories]
     most_recent_rundate = max(rundates, key=isoparse)
@@ -124,6 +183,7 @@ def read_latest_rundate_data(
 
 def transform_and_save_as_delta(
     spark: SparkSession,
+    adls_client: AdlsClient,
     input_df: DataFrame,
     transform_func: Callable[[DataFrame], DataFrame],
     target_container: str,
@@ -131,10 +191,11 @@ def transform_and_save_as_delta(
     overwrite: bool = True,
     merge_keys: Optional[list[str]] = None,
 ) -> None:
-    """Transforms an input dataframe using the provided transformation function and saves the result as a Delta table.
+    """Transforms an input dataframe using a provided transformation function and saves the result as a Delta table.
 
     Args:
         spark: Spark session.
+        adls_client: ADLS Client.
         input_df: Data frame to be transformed.
         transform_func: Transformation function.
         target_container: Name of the destination container in ADLS.
@@ -144,6 +205,5 @@ def transform_and_save_as_delta(
 
     """
     transformed_df = transform_func(input_df)
-    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     output_filepath = adls_client.get_adls_file_url(target_container, output_file_name)
     save_dataframe_as_delta(spark, transformed_df, output_filepath, overwrite, merge_keys)
