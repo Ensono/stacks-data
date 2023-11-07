@@ -32,9 +32,7 @@ class TableTransformation:
 
 
 class EtlSession:
-    def __init__(
-        self, app_name: str, spark_config: dict[str, Any] = None, storage_account_name: str = AZURE_STORAGE_ACCOUNT_NAME
-    ):
+    def __init__(self, app_name: str, spark_config: dict[str, Any] = None):
         """Initiate a Spark session with a configured ADLS Client.
 
         Args:
@@ -45,7 +43,7 @@ class EtlSession:
         self.app_name = app_name
         self.spark_config = spark_config
         self.spark_session = self.get_spark_session_for_adls()
-        self.adls_client = AdlsClient(storage_account_name)
+        self.adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
 
     def get_spark_session_for_adls(self) -> SparkSession:
         """Retrieve a SparkSession configured for Azure Data Lake Storage access.
