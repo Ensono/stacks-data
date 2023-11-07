@@ -15,12 +15,6 @@ from pyspark.sql import DataFrame, SparkSession
 
 from stacks.data.azure.adls import AdlsClient
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
-from stacks.data.constants import (
-    AZURE_TENANT_ID,
-    AZURE_CLIENT_ID,
-    AZURE_CLIENT_SECRET,
-    AZURE_STORAGE_ACCOUNT_NAME,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +37,7 @@ class EtlSession:
         self.app_name = app_name
         self.spark_config = spark_config
         self.spark_session = self.get_spark_session_for_adls()
-        self.adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
+        self.adls_client = AdlsClient(os.getenv("AZURE_STORAGE_ACCOUNT_NAME"))
 
     def get_spark_session_for_adls(self) -> SparkSession:
         """Retrieve a SparkSession configured for Azure Data Lake Storage access.
@@ -61,7 +55,7 @@ class EtlSession:
         """
         self.check_env()
         spark = get_spark_session(self.app_name, self.spark_config)
-        self.set_spark_properties(spark)
+        set_spark_properties(spark)
         return spark
 
     def check_env(self) -> None:
@@ -78,34 +72,36 @@ class EtlSession:
             "AZURE_CONFIG_ACCOUNT_NAME",
         ]
 
-        missing_variables = [var_name for var_name in required_variables if os.environ.get(var_name) is None]
+        missing_variables = [var_name for var_name in required_variables if not os.environ.get(var_name)]
 
         if missing_variables:
             raise EnvironmentError("The following environment variables are not set: " + ", ".join(missing_variables))
 
-    def set_spark_properties(spark: SparkSession) -> None:
-        """Sets Spark properties to configure Azure credentials to access Data Lake storage.
 
-        Args:
-            spark: Spark session.
-        """
-        spark.conf.set(f"fs.azure.account.auth.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net", "OAuth")
-        spark.conf.set(
-            f"fs.azure.account.oauth.provider.type.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
-            "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
-        )
-        spark.conf.set(
-            f"fs.azure.account.oauth2.client.id.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
-            AZURE_CLIENT_ID,
-        )
-        spark.conf.set(
-            f"fs.azure.account.oauth2.client.secret.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
-            AZURE_CLIENT_SECRET,
-        )
-        spark.conf.set(
-            f"fs.azure.account.oauth2.client.endpoint.{AZURE_STORAGE_ACCOUNT_NAME}.dfs.core.windows.net",
-            f"https://login.microsoftonline.com/{AZURE_TENANT_ID}/oauth2/token",
-        )
+def set_spark_properties(spark: SparkSession) -> None:
+    """Sets Spark properties to configure Azure credentials to access Data Lake storage.
+
+    Args:
+        spark: Spark session.
+    """
+    adls_account = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
+    spark.conf.set(f"fs.azure.account.auth.type.{adls_account}.dfs.core.windows.net", "OAuth")
+    spark.conf.set(
+        f"fs.azure.account.oauth.provider.type.{adls_account}.dfs.core.windows.net",
+        "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+    )
+    spark.conf.set(
+        f"fs.azure.account.oauth2.client.id.{adls_account}.dfs.core.windows.net",
+        os.getenv("AZURE_CLIENT_ID"),
+    )
+    spark.conf.set(
+        f"fs.azure.account.oauth2.client.secret.{adls_account}.dfs.core.windows.net",
+        os.getenv("AZURE_CLIENT_SECRET"),
+    )
+    spark.conf.set(
+        f"fs.azure.account.oauth2.client.endpoint.{adls_account}.dfs.core.windows.net",
+        f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID')}/oauth2/token",
+    )
 
 
 def save_files_as_delta_tables(
