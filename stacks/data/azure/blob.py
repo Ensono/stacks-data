@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class BlobStorageClient:
     def __init__(self, storage_account_name: str):
-        """Initiate a new Blob Storage Client.
+        """Instantiate a new Blob Storage Client.
 
         Args:
             storage_account_name: Name of the storage account
