@@ -8,6 +8,7 @@ from stacks.data.pyspark.etl import get_data_factory_param
 from stacks.data.logger import setup_logger
 
 CONFIG_PATH = "ingest/{{ pipeline_name }}/data_quality/data_quality_config.json"
+WORKLOAD_NAME = "{{ pipeline_name }}"
 
 logger_library = "stacks.data"
 
@@ -21,6 +22,7 @@ if __name__ == "__main__":
 
     # Run Data Quality
     data_quality_main(
+        workload_name = WORKLOAD_NAME,
         config_path=CONFIG_PATH,
         container_name=CONFIG_CONTAINER_NAME,
         test_flag=test_flag,
