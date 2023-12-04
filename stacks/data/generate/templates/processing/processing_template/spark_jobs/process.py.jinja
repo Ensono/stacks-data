@@ -12,7 +12,7 @@ def etl_main() -> None:
     """Execute data processing and transformation jobs."""
     logger.info(f"Running {WORKLOAD_NAME} processing...")
 
-    etl_session = EtlSession(adls_client)
+    etl_session = EtlSession(WORKLOAD_NAME)
     spark_session = etl_session.spark_session
     adls_client = etl_session.adls_client
 
