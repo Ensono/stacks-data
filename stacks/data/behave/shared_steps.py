@@ -29,7 +29,6 @@ from stacks.data.azure.adls import AdlsClient
 
 credential = DefaultAzureCredential()
 adf_client = DataFactoryManagementClient(credential, AZURE_SUBSCRIPTION_ID)
-adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
 
 
 @given("the ADF pipeline {pipeline_name} has been triggered with {parameters}")
@@ -104,6 +103,7 @@ def check_all_files_present_in_adls(context: Context, output_files: str, contain
         container_name: The name of the ADLS container.
         directory_name: The directory path in the container.
     """
+    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
     expected_files_list = json.loads(output_files)
     test_directory_name = f"{directory_name}/automated_tests/{context.test_run_id}"
     assert adls_client.all_files_present_in_adls(container_name, test_directory_name, expected_files_list)
