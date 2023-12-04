@@ -1,5 +1,4 @@
 import uuid
-from unittest.mock import MagicMock, patch
 
 from pytest import fixture
 
@@ -21,25 +20,6 @@ def spark(tmp_path_factory):
     yield spark
 
     spark.stop()
-
-
-@fixture
-def json_contents():
-    file_path = TEST_DATA_DIR + "data_quality/test_dq_config.json"
-    with open(file_path, "r") as file:
-        file_contents = file.read()
-
-    yield file_contents
-
-
-@fixture
-def mock_blob_client(json_contents):
-    with patch("stacks.data.pyspark.storage_utils.BlobServiceClient") as mock_BlobServiceClient:
-        mock_blob_client = MagicMock()
-        mock_blob_client.download_blob.return_value.readall.return_value = json_contents
-        mock_BlobServiceClient.return_value.get_blob_client.return_value = mock_blob_client
-
-        yield mock_BlobServiceClient
 
 
 @fixture
