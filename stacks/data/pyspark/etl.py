@@ -14,6 +14,7 @@ from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
 from stacks.data.azure.adls import AdlsClient
+from stacks.data.azure.blob import BlobStorageClient
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
 
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class EtlSession:
         self.spark_config = spark_config
         self.spark_session = self.get_spark_session_for_adls()
         self.adls_client = AdlsClient(os.getenv("AZURE_STORAGE_ACCOUNT_NAME"))
+        self.blob_storage_client = BlobStorageClient(os.getenv("AZURE_CONFIG_ACCOUNT_NAME"))
 
     def get_spark_session_for_adls(self) -> SparkSession:
         """Retrieve a SparkSession configured for Azure Data Lake Storage access.

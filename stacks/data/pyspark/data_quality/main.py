@@ -13,14 +13,16 @@ from stacks.data.pyspark.data_quality.utils import (
     publish_quality_results_table,
     replace_adls_data_location,
 )
-from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource
-from stacks.data.pyspark.storage_utils import check_env, load_json_from_blob, set_spark_properties
+
+from stacks.data.pyspark.etl import EtlSession
+from stacks.data.pyspark.pyspark_utils import read_datasource
 from stacks.data.utils import substitute_env_vars
 
 logger = logging.getLogger(__name__)
 
 
 def data_quality_main(
+    workload_name: str,
     config_path: str,
     container_name: str = CONFIG_CONTAINER_NAME,
     test_flag: bool = False,
@@ -30,6 +32,7 @@ def data_quality_main(
     """Executes data quality checks based on the provided configuration.
 
     Args:
+        workload_name: Name of the workload, for naming the Spark application.
         config_path: Path to a JSON config inside an Azure Blob container.
         container_name: Name of the container for storing configurations.
         test_flag: Flag if the process is being run as part of automated tests.
@@ -40,15 +43,13 @@ def data_quality_main(
         EnvironmentError: if any of the required environment variables for ADLS access are not set.
 
     """
-    check_env()
+    etl_session = EtlSession(f"DataQuality-{workload_name}")
+    spark = etl_session.spark_session
+    blob_storage_client = etl_session.blob_storage_client
 
-    dq_conf_dict = load_json_from_blob(container_name, config_path)
+    dq_conf_dict = blob_storage_client.load_json_from_blob(container_name, config_path)
     dq_conf = Config.parse_obj(dq_conf_dict)
     logger.info(f"Running Data Quality processing for dataset: {dq_conf.dataset_name}...")
-
-    spark = get_spark_session(f"DataQuality-{dq_conf.dataset_name}")
-
-    set_spark_properties(spark)
 
     if test_flag and test_data_adls_path:
         dq_input_path = replace_adls_data_location(dq_conf.dq_input_path, test_data_adls_path)

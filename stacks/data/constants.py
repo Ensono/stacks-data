@@ -20,7 +20,6 @@ GOLD_CONTAINER_NAME = "curated"
 
 # Config storage constants
 CONFIG_CONTAINER_NAME = "config"
-CONFIG_BLOB_URL = f"https://{AZURE_CONFIG_ACCOUNT_NAME}.blob.core.windows.net"
 
 # Automated test config
 AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX = "automated_test"
