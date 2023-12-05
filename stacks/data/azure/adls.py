@@ -57,7 +57,7 @@ class AdlsClient:
         """
         for directory_path in directory_paths:
             logger.info(f"ATTEMPTING TO DELETE DIRECTORY: {directory_path}")
-            self.delete_directory_adls(self.adls_client, container_name, directory_path)
+            self.delete_directory_adls(container_name, directory_path)
 
     def delete_directory_adls(self, container_name: str, directory_path: str):
         """Deletes an ADLS directory.
