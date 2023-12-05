@@ -14,7 +14,7 @@ from behave import given, step, then
 from behave.runner import Context
 
 from stacks.data.constants import (
-    AZURE_STORAGE_ACCOUNT_NAME,
+    ADLS_ACCOUNT,
     AZURE_SUBSCRIPTION_ID,
     AZURE_DATA_FACTORY_NAME,
     AZURE_RESOURCE_GROUP_NAME,
@@ -103,7 +103,7 @@ def check_all_files_present_in_adls(context: Context, output_files: str, contain
         container_name: The name of the ADLS container.
         directory_name: The directory path in the container.
     """
-    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
+    adls_client = AdlsClient(ADLS_ACCOUNT)
     expected_files_list = json.loads(output_files)
     test_directory_name = f"{directory_name}/automated_tests/{context.test_run_id}"
     assert adls_client.all_files_present_in_adls(container_name, test_directory_name, expected_files_list)

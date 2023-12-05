@@ -20,8 +20,8 @@ TEST_ENV_VARS_FULL = {
     "AZURE_TENANT_ID": "dir_id",
     "AZURE_CLIENT_ID": "app_id",
     "AZURE_CLIENT_SECRET": "secret",
-    "AZURE_STORAGE_ACCOUNT_NAME": "myadlsaccount",
-    "AZURE_CONFIG_ACCOUNT_NAME": "myblobaccount",
+    "ADLS_ACCOUNT": "myadlsaccount",
+    "CONFIG_BLOB_ACCOUNT": "myblobaccount",
 }
 
 TEST_ENV_VARS_PARTIAL = {
@@ -80,14 +80,14 @@ def test_check_env_missing_vars(mock_etl_session):
 def test_check_env_raises_partial_vars(mock_etl_session):
     with pytest.raises(EnvironmentError) as excinfo:
         mock_etl_session.check_env()
-    assert "AZURE_STORAGE_ACCOUNT_NAME" in str(excinfo.value)
-    assert "AZURE_CONFIG_ACCOUNT_NAME" in str(excinfo.value)
+    assert "ADLS_ACCOUNT" in str(excinfo.value)
+    assert "CONFIG_BLOB_ACCOUNT" in str(excinfo.value)
 
 
 @patch.dict("os.environ", TEST_ENV_VARS_FULL, clear=True)
 def test_set_spark_properties(spark):
     set_spark_properties(spark)
-    adls_account = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
+    adls_account = os.getenv("ADLS_ACCOUNT")
     assert spark.conf.get(f"fs.azure.account.auth.type.{adls_account}.dfs.core.windows.net") == "OAuth"
     assert (
         spark.conf.get(f"fs.azure.account.oauth.provider.type.{adls_account}.dfs.core.windows.net")

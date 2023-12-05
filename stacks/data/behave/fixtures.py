@@ -9,8 +9,8 @@ from os.path import isfile, join
 from behave import fixture
 from behave.runner import Context
 from stacks.data.constants import (
-    AZURE_STORAGE_ACCOUNT_NAME,
-    AZURE_CONFIG_ACCOUNT_NAME,
+    ADLS_ACCOUNT,
+    CONFIG_BLOB_ACCOUNT,
     CONFIG_CONTAINER_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
@@ -30,7 +30,7 @@ def azure_adls_clean_up(context: Context, container_name: str, ingest_directory_
         ingest_directory_name: Name of the ADLS directory to delete.
 
     """
-    adls_client = AdlsClient(AZURE_STORAGE_ACCOUNT_NAME)
+    adls_client = AdlsClient(ADLS_ACCOUNT)
     logger.info("BEFORE SCENARIO: Deleting any existing test output data.")
     automated_test_output_directory_paths = adls_client.filter_directory_paths_adls(
         container_name,
@@ -62,7 +62,7 @@ def azure_blob_config_prepare(context: Context, data_target_directory: str, data
         data_target_directory: The test directory prefix to clear out and upload to
         data_local_directory: Directory where the test config files are stored.
     """
-    blob_storage_client = BlobStorageClient(AZURE_CONFIG_ACCOUNT_NAME)
+    blob_storage_client = BlobStorageClient(CONFIG_BLOB_ACCOUNT)
 
     target_directory = f"{AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX}/{data_target_directory}"
 

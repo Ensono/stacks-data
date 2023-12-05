@@ -38,8 +38,8 @@ class EtlSession:
         self.app_name = app_name
         self.spark_config = spark_config
         self.spark_session = self.get_spark_session_for_adls()
-        self.adls_client = AdlsClient(os.getenv("AZURE_STORAGE_ACCOUNT_NAME"))
-        self.blob_storage_client = BlobStorageClient(os.getenv("AZURE_CONFIG_ACCOUNT_NAME"))
+        self.adls_client = AdlsClient(os.getenv("ADLS_ACCOUNT"))
+        self.blob_storage_client = BlobStorageClient(os.getenv("CONFIG_BLOB_ACCOUNT"))
 
     def get_spark_session_for_adls(self) -> SparkSession:
         """Retrieve a SparkSession configured for Azure Data Lake Storage access.
@@ -70,8 +70,8 @@ class EtlSession:
             "AZURE_TENANT_ID",
             "AZURE_CLIENT_ID",
             "AZURE_CLIENT_SECRET",
-            "AZURE_STORAGE_ACCOUNT_NAME",
-            "AZURE_CONFIG_ACCOUNT_NAME",
+            "ADLS_ACCOUNT",
+            "CONFIG_BLOB_ACCOUNT",
         ]
 
         missing_variables = [var_name for var_name in required_variables if not os.environ.get(var_name)]
@@ -86,7 +86,7 @@ def set_spark_properties(spark: SparkSession) -> None:
     Args:
         spark: Spark session.
     """
-    adls_account = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
+    adls_account = os.getenv("ADLS_ACCOUNT")
     spark.conf.set(f"fs.azure.account.auth.type.{adls_account}.dfs.core.windows.net", "OAuth")
     spark.conf.set(
         f"fs.azure.account.oauth.provider.type.{adls_account}.dfs.core.windows.net",
