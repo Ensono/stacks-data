@@ -4,6 +4,7 @@ This module provides utility functions to automate the generation of data pipeli
 rendering templates based on the provided config, and writing out the rendered templates to the specified directories.
 """
 import click
+import os
 
 from stacks.data.generate.template_config import WorkloadConfigBaseModel
 from jinja2 import Environment, PackageLoader
@@ -24,8 +25,9 @@ def generate_target_dir(workload_type: str, name: str) -> str:
     Returns:
         Path to render template into
     """
-    target_dir = f"de_workloads/{workload_type}/{name}"
+    target_dir = os.path.join("de_workloads", workload_type, name)
     return target_dir
+      
 
 
 def render_template_components(config: WorkloadConfigBaseModel, template_source_path: str, target_dir: str) -> None:
@@ -109,3 +111,5 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     click.echo(f"Successfully generated workload components: {target_dir}")
 
     return target_dir
+
+
