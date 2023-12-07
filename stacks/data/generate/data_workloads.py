@@ -1,12 +1,18 @@
-import os
+"""Data Workload Generation Utilities.
+
+This module provides utility functions to automate the generation of data pipelines and workloads. It facilitates
+rendering templates based on the provided config, and writing out the rendered templates to the specified directories.
+"""
 import click
+
+from stacks.data.generate.template_config import WorkloadConfigBaseModel
 from jinja2 import Environment, PackageLoader
 from pathlib import Path
 from typing import Type
-from stacks.data.generate.template_config import WorkloadConfigBaseModel
 
 GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
+
 
 def generate_target_dir(workload_type: str, name: str) -> str:
     """Generate the target directory name using workload_type and name of the dataset.
@@ -18,12 +24,12 @@ def generate_target_dir(workload_type: str, name: str) -> str:
     Returns:
         Path to render template into
     """
-    target_dir = os.path.join("de_workloads", workload_type, name)
+    target_dir = f"de_workloads/{workload_type}/{name}"
     return target_dir
 
+
 def render_template_components(config: WorkloadConfigBaseModel, template_source_path: str, target_dir: str) -> None:
-    """
-    Render all template components using the provided config.
+    """Render all template components using the provided config.
 
     Renders all templates within a given path with provided config, and saves results into a new target path,
     while maintaining folder structure and removing jinja file extensions, any existing files with the same name
@@ -34,22 +40,19 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         template_source_path: Path containing templates to be rendered
         target_dir: Directory to render templates into
     """
-    target_path = Path(target_dir)
-    target_path.mkdir(parents=True, exist_ok=True)
-
+    Path(target_dir).mkdir(parents=True, exist_ok=True)
     template_loader = PackageLoader(GENERATE_PACKAGE_NAME, template_source_path)
     template_env = Environment(loader=template_loader, autoescape=True, keep_trailing_newline=True)
 
-    for template in template_env.list_templates(extensions=".jinja"):
+    template_list = template_env.list_templates(extensions=".jinja")
+    for template in template_list:
         template = template_env.get_template(template)
-        template_filepath = Path(template.filename).relative_to(template_source_path)
-        template_dir = target_path / template_filepath.parent
-        template_dir.mkdir(parents=True, exist_ok=True)
-        template_name = template_filepath.stem
-        template_file_path = template_dir / template_name
+        template_filepath = Path(template.filename.split(template_source_path, 1)[1])
+        template_path = template_filepath.parent
+        template_filename = template_filepath.stem
+        Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
+        template.stream(config).dump(f"{target_dir}/{template_path}/{template_filename}")
 
-        with open(template_file_path, "w") as template_file:
-            template_file.write(template.render(config=config))
 
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
     """Validates a YAML config with the WorkloadConfigModel provided.
@@ -67,6 +70,7 @@ def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBase
     click.echo("Successfully read config file.\n")
     return config
 
+
 def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) -> str:
     """Generate a data pipeline workload into the project.
 
@@ -80,10 +84,10 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
         Path to rendered template
     """
     workload_type = validated_config.workload_type.lower()
-    template_source_path = Path(TEMPLATES_DIRECTORY) / workload_type / validated_config.template_source_folder
+    template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
-    if Path(target_dir).exists():
+    if Path(f"{target_dir}").exists():
         click.echo(
             f"Target Directory {target_dir} already exists. "
             "Any files which are duplicated in the template will be overwritten."
@@ -97,13 +101,11 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
         click.echo(f"Target Directory {target_dir} doesn't exist, creating directory.")
 
     click.echo(f"Generating workload components for pipeline {validated_config.name}...")
-    render_template_components(validated_config, str(template_source_path), target_dir)
+    render_template_components(validated_config, template_source_path, target_dir)
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
-        template_source_path = Path(TEMPLATES_DIRECTORY) / workload_type / template_source_folder
-        render_template_components(validated_config, str(template_source_path), target_dir)
+        template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{template_source_folder}/"
+        render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
     return target_dir
-
-
