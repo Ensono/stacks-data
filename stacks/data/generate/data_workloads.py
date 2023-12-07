@@ -25,7 +25,7 @@ def get_os_path_separator():
         return '/'  
     # Default to '/' for other systems# Example usage:
 path_separator = get_os_path_separator()
-print(f"Path separator for this OS: {path_separator}")
+
 
 def generate_target_dir(workload_type: str, name: str) -> str:
     """Generate the target directory name using workload_type and name of the dataset.
