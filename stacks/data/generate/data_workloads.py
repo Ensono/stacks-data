@@ -13,6 +13,19 @@ from typing import Type
 GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
 
+def get_os_path_separator():     
+    """Get the appropriate path separator for the current operating system."""    
+    if os.name == 'posix':         
+        return '/'  
+    # Unix/Linux/macOS    
+    elif os.name == 'nt':         
+        return '\\'  
+    # Windows    
+    else:         
+        return '/'  
+    # Default to '/' for other systems# Example usage:
+path_separator = get_os_path_separator()
+print(f"Path separator for this OS: {path_separator}")
 
 def generate_target_dir(workload_type: str, name: str) -> str:
     """Generate the target directory name using workload_type and name of the dataset.
@@ -48,13 +61,13 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
     template_list = template_env.list_templates(extensions=".jinja")
     for template in template_list:
         template = template_env.get_template(template)
-        template_filepath = Path(template.filename.split(template_source_path, 1)[1])
+        template_filepath = Path(template.filename.split(str(template_source_path), 1)[1])
         template_path = template_filepath.parent
         template_filename = template_filepath.stem
         Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
-        #template.stream(config).dump(f"{target_dir}/{template_path}/{template_filename}")
         output_file_path = os.path.join(target_dir, template_path, template_filename)
         template.stream(config).dump(output_file_path)
+        print("Output_file_path is : ", output_file_path)
 
 
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
@@ -88,6 +101,8 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     """
     workload_type = validated_config.workload_type.lower()
     template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
+    template_source_path = str(template_source_path)+path_separator
+
     #template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
@@ -108,8 +123,8 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     render_template_components(validated_config, template_source_path, target_dir)
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
-        template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
-        #template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{template_source_folder}/"
+        template_source_path = os.path.join(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
+        template_source_path = str(template_source_path)+path_separator
         render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
