@@ -31,7 +31,8 @@ def generate_target_dir(workload_type: str, name: str) -> str:
 
 
 def render_template_components(config: WorkloadConfigBaseModel, template_source_path: str, target_dir: str) -> None:
-    """Render all template components using the provided config.
+    """
+    Render all template components using the provided config.
 
     Renders all templates within a given path with provided config, and saves results into a new target path,
     while maintaining folder structure and removing jinja file extensions, any existing files with the same name
@@ -42,18 +43,27 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         template_source_path: Path containing templates to be rendered
         target_dir: Directory to render templates into
     """
-    Path(target_dir).mkdir(parents=True, exist_ok=True)
+    target_path = os.path.join(target_dir)
+
+    if not os.path.exists(target_path):
+        os.makedirs(target_path)
+
     template_loader = PackageLoader(GENERATE_PACKAGE_NAME, template_source_path)
     template_env = Environment(loader=template_loader, autoescape=True, keep_trailing_newline=True)
 
-    template_list = template_env.list_templates(extensions=".jinja")
-    for template in template_list:
+    for template in template_env.list_templates(extensions=".jinja"):
         template = template_env.get_template(template)
-        template_filepath = Path(template.filename.split(template_source_path, 1)[1])
-        template_path = template_filepath.parent
-        template_filename = template_filepath.stem
-        Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
-        template.stream(config).dump(f"{target_dir}/{template_path}/{template_filename}")
+        template_filepath = os.path.relpath(template.filename, start=template_source_path)
+        template_dir = os.path.join(target_path, os.path.dirname(template_filepath))
+        
+        if not os.path.exists(template_dir):
+            os.makedirs(template_dir)
+            
+        template_name = os.path.splitext(os.path.basename(template_filepath))[0]
+        template_file_path = os.path.join(template_dir, template_name)
+
+        with open(template_file_path, "w") as template_file:
+            template_file.write(template.render(config=config))
 
 
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
