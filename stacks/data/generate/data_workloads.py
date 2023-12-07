@@ -14,6 +14,8 @@ GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
 
 
+
+
 def generate_target_dir(workload_type: str, name: str) -> str:
     """Generate the target directory name using workload_type and name of the dataset.
 
@@ -25,8 +27,9 @@ def generate_target_dir(workload_type: str, name: str) -> str:
         Path to render template into
     """
     target_dir = f"de_workloads/{workload_type}/{name}"
-    return target_dir
-
+    print(target_dir)
+    return target_dir 
+    
 
 def render_template_components(config: WorkloadConfigBaseModel, template_source_path: str, target_dir: str) -> None:
     """Render all template components using the provided config.
@@ -50,6 +53,8 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         template_filepath = Path(template.filename.split(template_source_path, 1)[1])
         template_path = template_filepath.parent
         template_filename = template_filepath.stem
+        print(template_path)
+        print(template_filename)
         Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
         template.stream(config).dump(f"{target_dir}/{template_path}/{template_filename}")
 
