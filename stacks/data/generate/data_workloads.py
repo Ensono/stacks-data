@@ -13,6 +13,7 @@ from typing import Type
 GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
 
+
 def generate_target_dir(workload_type: str, name: str) -> str:
     """Generate the target directory name using workload_type and name of the dataset.
 
@@ -24,8 +25,8 @@ def generate_target_dir(workload_type: str, name: str) -> str:
         Path to render template into
     """
     target_dir = os.path.join("de_workloads", workload_type, name)
-    print(f"Target Directory: {target_dir}")
-    return target_dir 
+    print("Target",target_dir)
+    return target_dir
 
 
 def render_template_components(config: WorkloadConfigBaseModel, template_source_path: str, target_dir: str) -> None:
@@ -40,37 +41,20 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         template_source_path: Path containing templates to be rendered
         target_dir: Directory to render templates into
     """
-    target_path = os.path.abspath(target_dir)
-    os.makedirs(target_path, exist_ok=True)
-    print(f"Target Path: {target_path}")
-
+    Path(target_dir).mkdir(parents=True, exist_ok=True)
     template_loader = PackageLoader(GENERATE_PACKAGE_NAME, template_source_path)
     template_env = Environment(loader=template_loader, autoescape=True, keep_trailing_newline=True)
 
     template_list = template_env.list_templates(extensions=".jinja")
     for template in template_list:
         template = template_env.get_template(template)
-        
-        # Calculate relative path from template filename to template_source_path
-        template_filepath = os.path.relpath(template.filename, start=template_source_path)
-        template_path = os.path.dirname(template_filepath)
-        template_filename = os.path.splitext(os.path.basename(template_filepath))[0]
-        print(f"Template Path: {template_path}")
-        print(f"Template Filename: {template_filename}")
-
-        # Construct the full output directory path
-        output_directory = os.path.join(target_path, template_path)
-        os.makedirs(output_directory, exist_ok=True)
-        print(f"Output Directory: {output_directory}")
-
-        # Construct the full output file path
-        output_file = os.path.join(output_directory, f"{template_filename}.txt")
-        print(f"Output File: {output_file}")
-
-        with open(output_file, "w") as template_file:
-            template_file.write(template.stream(config).dump())
-
-        print(f"Rendered: {output_file}")
+        template_filepath = Path(template.filename.split(template_source_path, 1)[1])
+        template_path = template_filepath.parent
+        template_filename = template_filepath.stem
+        Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
+        #template.stream(config).dump(f"{target_dir}/{template_path}/{template_filename}")
+        output_file_path = os.path.join(target_dir, template_path, template_filename)
+        template.stream(config).dump(output_file_path)
 
 
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
@@ -103,7 +87,8 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
         Path to rendered template
     """
     workload_type = validated_config.workload_type.lower()
-    template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
+    template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
+    #template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
     if Path(f"{target_dir}").exists():
@@ -123,7 +108,8 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     render_template_components(validated_config, template_source_path, target_dir)
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
-        template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{template_source_folder}/"
+        template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
+        #template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{template_source_folder}/"
         render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
