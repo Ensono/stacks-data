@@ -21,7 +21,7 @@ def get_os_path_separator():
     else:
         # All other systems
         return '/'
-path_separator = get_os_path_separator()
+
 
 
 def generate_target_dir(workload_type: str, name: str) -> str:
@@ -35,7 +35,6 @@ def generate_target_dir(workload_type: str, name: str) -> str:
         Path to render template into
     """
     target_dir = os.path.join("de_workloads", workload_type, name)
-    print("Target",target_dir)
     return target_dir
 
 
@@ -64,7 +63,7 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
         output_file_path = os.path.join(target_dir, template_path, template_filename)
         template.stream(config).dump(output_file_path)
-        print("Output_file_path is : ", output_file_path)
+
 
 
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
@@ -96,6 +95,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     Returns:
         Path to rendered template
     """
+    path_separator = get_os_path_separator()
     workload_type = validated_config.workload_type.lower()
     template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
     template_source_path = str(template_source_path)+path_separator
