@@ -100,7 +100,6 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
     template_source_path = str(template_source_path)+path_separator
 
-    #template_source_path = f"{TEMPLATES_DIRECTORY}/{workload_type}/{validated_config.template_source_folder}/"
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
     if Path(f"{target_dir}").exists():
