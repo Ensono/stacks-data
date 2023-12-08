@@ -15,15 +15,12 @@ TEMPLATES_DIRECTORY = "templates"
 
 def get_os_path_separator():     
     """Get the appropriate path separator for the current operating system."""    
-    if os.name == 'posix':         
-        return '/'  
-    # Unix/Linux/macOS    
-    elif os.name == 'nt':         
-        return '\\'  
-    # Windows    
-    else:         
-        return '/'  
-    # Default to '/' for other systems# Example usage:
+    if os.name == 'nt':
+        # Windows
+        return '\\'
+    else:
+        # All other systems
+        return '/'
 path_separator = get_os_path_separator()
 
 
