@@ -97,8 +97,9 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     path_separator = get_os_path_separator()
     workload_type = validated_config.workload_type.lower()
     template_source_path = (
-        Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder) + path_separator
-    )
+        Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
+    ) + path_separator
+
     print(type(template_source_path))
     # template_source_path = str(template_source_path) + path_separator
 
