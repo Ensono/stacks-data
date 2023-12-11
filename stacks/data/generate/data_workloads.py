@@ -94,10 +94,10 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     Returns:
         Path to rendered template
     """
-    path_separator = get_os_path_separator()
+    # path_separator = get_os_path_separator()
     workload_type = validated_config.workload_type.lower()
     template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
-    template_source_path = template_source_path.joinpath(path_separator)
+    # template_source_path = template_source_path.joinpath(path_separator)
 
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
@@ -119,7 +119,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
         template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
-        template_source_path = template_source_path.joinpath(path_separator)
+        # template_source_path = template_source_path.joinpath(path_separator)
         render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
