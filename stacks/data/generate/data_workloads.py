@@ -14,8 +14,12 @@ GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
 
 
-def get_os_path_separator():
-    """Get the appropriate path separator for the current operating system."""
+def get_os_path_separator() -> str:
+    """Get the appropriate path separator for the current operating system.
+
+    Returns:
+        Path separator character.
+    """
     if os.name == "nt":
         # Windows
         return "\\"
@@ -57,7 +61,7 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
     template_list = template_env.list_templates(extensions=".jinja")
     for template in template_list:
         template = template_env.get_template(template)
-        template_filepath = Path(template.filename.split(str(template_source_path), 1)[1])
+        template_filepath = Path(template.filename.split(template_source_path, 1)[1])
         template_path = template_filepath.parent
         template_filename = template_filepath.stem
         Path(target_dir / template_path).mkdir(parents=True, exist_ok=True)
@@ -115,12 +119,12 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
         click.echo(f"Target Directory {target_dir} doesn't exist, creating directory.")
 
     click.echo(f"Generating workload components for pipeline {validated_config.name}...")
-    render_template_components(validated_config, template_source_path, target_dir)
+    render_template_components(validated_config, str(template_source_path), target_dir)
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
         template_source_path = os.path.join(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
         template_source_path = str(template_source_path) + path_separator
-        render_template_components(validated_config, template_source_path, target_dir)
+        render_template_components(validated_config, str(template_source_path), target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
     return target_dir
