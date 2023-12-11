@@ -13,15 +13,15 @@ from typing import Type
 GENERATE_PACKAGE_NAME = "stacks.data.generate"
 TEMPLATES_DIRECTORY = "templates"
 
-def get_os_path_separator():     
-    """Get the appropriate path separator for the current operating system."""    
-    if os.name == 'nt':
+
+def get_os_path_separator():
+    """Get the appropriate path separator for the current operating system."""
+    if os.name == "nt":
         # Windows
-        return '\\'
+        return "\\"
     else:
         # All other systems
-        return '/'
-
+        return "/"
 
 
 def generate_target_dir(workload_type: str, name: str) -> str:
@@ -65,7 +65,6 @@ def render_template_components(config: WorkloadConfigBaseModel, template_source_
         template.stream(config).dump(output_file_path)
 
 
-
 def validate_yaml_config(path: str, WorkloadConfigModel: Type[WorkloadConfigBaseModel]) -> WorkloadConfigBaseModel:
     """Validates a YAML config with the WorkloadConfigModel provided.
 
@@ -98,7 +97,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     path_separator = get_os_path_separator()
     workload_type = validated_config.workload_type.lower()
     template_source_path = Path(TEMPLATES_DIRECTORY, workload_type, validated_config.template_source_folder)
-    template_source_path = str(template_source_path)+path_separator
+    template_source_path = str(template_source_path) + path_separator
 
     target_dir = generate_target_dir(workload_type, validated_config.name)
 
@@ -120,7 +119,7 @@ def generate_pipeline(validated_config: WorkloadConfigBaseModel, dq_flag: bool) 
     if dq_flag:
         template_source_folder = f"{validated_config.template_source_folder}_DQ"
         template_source_path = os.path.join(TEMPLATES_DIRECTORY, workload_type, template_source_folder)
-        template_source_path = str(template_source_path)+path_separator
+        template_source_path = str(template_source_path) + path_separator
         render_template_components(validated_config, template_source_path, target_dir)
     click.echo(f"Successfully generated workload components: {target_dir}")
 
