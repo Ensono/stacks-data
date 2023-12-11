@@ -18,10 +18,10 @@ def get_os_path_separator():
     """Get the appropriate path separator for the current operating system."""
     if os.name == "nt":
         # Windows
-        return "\\"
+        return str("\\")
     else:
         # All other systems
-        return "/"
+        return str("/")
 
 
 def generate_target_dir(workload_type: str, name: str) -> str:
