@@ -2,8 +2,13 @@
 
 This module provides a collection of helper functions related to Azure Data Factory.
 """
+import logging
+import sys
+
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import PipelineRun, CreateRunResponse
+
+logger = logging.getLogger(__name__)
 
 
 def create_adf_pipeline_run(
@@ -76,3 +81,29 @@ def check_adf_pipeline_in_complete_state(
         resource_group_name=resource_group_name, factory_name=data_factory_name, run_id=run_id
     )
     return pipeline_run.status in ["Succeeded", "Failed"]
+
+
+def get_data_factory_param(param_position: int, default_value: str | bool = None, convert_bool: bool = False):
+    """Gets parameters passed from Data Factory Python activities.
+
+    The values held in the parameters are expected to be strings - the convert_bool argument can be used to convert
+    strings back to bool type (where the string "True" will return True).
+
+    Args:
+        param_position: The ordinal position of the parameter passed to the Python activity.
+        default_value: Default value to return if the parameter is not found.
+        convert_bool: Convert the parameter to a bool based on string value of "True".
+
+    Returns:
+        The parameter value passed from Data Factory (via sys.argv) or the default parameter value.
+
+    """
+    if len(sys.argv) <= param_position:
+        logger.warning("Excepted arguments from Data Factory not found, using default value.")
+        return default_value
+    else:
+        data_factory_param = sys.argv[param_position]
+        if convert_bool:
+            return data_factory_param == "True"
+        else:
+            return data_factory_param

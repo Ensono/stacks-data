@@ -1,8 +1,9 @@
 import pytest
-from unittest.mock import Mock
+import sys
+from unittest.mock import Mock, patch
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import CreateRunResponse, PipelineRun
-from stacks.data.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run
+from stacks.data.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run, get_data_factory_param
 
 
 @pytest.fixture
@@ -56,3 +57,27 @@ def test_get_adf_pipeline_run(mock_adf_client):
         factory_name=data_factory_name,
         run_id=run_id,
     )
+
+
+def test_get_data_factory_param():
+    with patch.object(sys, "argv", ["script.py", "test_value"]):
+        result = get_data_factory_param(1, "default_value")
+        assert result == "test_value"
+
+
+def test_get_data_factory_param_default():
+    with patch.object(sys, "argv", ["script.py"]):
+        result = get_data_factory_param(1, "default_value")
+        assert result == "default_value"
+
+
+def test_get_data_factory_param_bool():
+    with patch.object(sys, "argv", ["script.py", "True"]):
+        result = get_data_factory_param(1, default_value=False, convert_bool=True)
+        assert result is True
+
+
+def test_get_data_factory_param_bool_false():
+    with patch.object(sys, "argv", ["script.py", "False"]):
+        result = get_data_factory_param(1, default_value=True, convert_bool=True)
+        assert result is False
