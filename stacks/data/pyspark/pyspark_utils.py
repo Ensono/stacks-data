@@ -7,6 +7,7 @@ from pyspark.errors import AnalysisException
 
 from pyspark.sql import DataFrame, SparkSession
 
+from stacks.data.constants import DEFAULT_SPARK_CONFIG
 from stacks.data.utils import camel_to_snake, substitute_env_vars
 
 logger = logging.getLogger(__name__)
@@ -30,11 +31,7 @@ def get_spark_session(app_name: str, spark_config: dict[str, Any] = None) -> Spa
     if not spark:
         logger.info("Creating Spark session...")
 
-        config = {
-            "spark.jars.packages": "org.apache.hadoop:hadoop-azure:3.3.4,io.delta:delta-core_2.12:2.4.0",
-            "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
-            "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-        }
+        config = DEFAULT_SPARK_CONFIG
 
         if spark_config:
             config.update(spark_config)

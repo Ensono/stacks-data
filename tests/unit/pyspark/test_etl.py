@@ -1,18 +1,108 @@
 import os
-import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from azure.storage.filedatalake import FileSystemClient, PathProperties
 
 import pytest
 from pyspark.sql import DataFrame
 from tests.unit.pyspark.conftest import BRONZE_CONTAINER, SILVER_CONTAINER, TEST_CSV_DIR
 
+from stacks.data.azure.adls import AdlsClient
 from stacks.data.pyspark.etl import (
+    EtlSession,
     read_latest_rundate_data,
     save_files_as_delta_tables,
     transform_and_save_as_delta,
-    get_data_factory_param,
+    set_spark_properties,
 )
+
+TEST_ENV_VARS_FULL = {
+    "AZURE_TENANT_ID": "dir_id",
+    "AZURE_CLIENT_ID": "app_id",
+    "AZURE_CLIENT_SECRET": "secret",
+    "ADLS_ACCOUNT": "myadlsaccount",
+    "CONFIG_BLOB_ACCOUNT": "myblobaccount",
+}
+
+TEST_ENV_VARS_PARTIAL = {
+    "AZURE_TENANT_ID": "dir_id",
+    "AZURE_CLIENT_ID": "app_id",
+    "AZURE_CLIENT_SECRET": "secret",
+}
+
+
+@pytest.fixture
+def mock_adls_client():
+    with patch("stacks.data.azure.adls.DataLakeServiceClient", autospec=True) as mock_service_client:
+
+        def get_paths_side_effect(path, recursive=True):
+            test_path = Path(TEST_CSV_DIR)
+            files_and_dirs = list(test_path.rglob("*")) if recursive else list(test_path.glob("*"))
+
+            mock_paths = []
+            for item in files_and_dirs:
+                mock_path = Mock(spec=PathProperties)
+                mock_path.name = str(item.relative_to(test_path))
+                mock_path.is_directory = item.is_dir()
+                mock_paths.append(mock_path)
+
+            return mock_paths
+
+        mock_client = AdlsClient("teststorageaccount")
+        mock_file_system_client = Mock(spec=FileSystemClient)
+        mock_file_system_client.get_paths.side_effect = get_paths_side_effect
+        mock_service_client.return_value.get_file_system_client.return_value = mock_file_system_client
+
+        yield mock_client
+
+
+@pytest.fixture
+def mock_etl_session(mock_adls_client, spark):
+    with patch("stacks.data.pyspark.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
+        "stacks.data.pyspark.etl.AdlsClient", return_value=mock_adls_client
+    ):
+        etl_session = EtlSession("pyspark-test")
+        yield etl_session
+
+
+@patch.dict("os.environ", TEST_ENV_VARS_FULL, clear=True)
+def test_check_env(mock_etl_session):
+    mock_etl_session.check_env()
+
+
+@patch.dict("os.environ", {}, clear=True)
+def test_check_env_missing_vars(mock_etl_session):
+    with pytest.raises(EnvironmentError):
+        mock_etl_session.check_env()
+
+
+@patch.dict("os.environ", TEST_ENV_VARS_PARTIAL, clear=True)
+def test_check_env_raises_partial_vars(mock_etl_session):
+    with pytest.raises(EnvironmentError) as excinfo:
+        mock_etl_session.check_env()
+    assert "ADLS_ACCOUNT" in str(excinfo.value)
+    assert "CONFIG_BLOB_ACCOUNT" in str(excinfo.value)
+
+
+@patch.dict("os.environ", TEST_ENV_VARS_FULL, clear=True)
+def test_set_spark_properties(spark):
+    set_spark_properties(spark)
+    adls_account = os.getenv("ADLS_ACCOUNT")
+    assert spark.conf.get(f"fs.azure.account.auth.type.{adls_account}.dfs.core.windows.net") == "OAuth"
+    assert (
+        spark.conf.get(f"fs.azure.account.oauth.provider.type.{adls_account}.dfs.core.windows.net")
+        == "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
+    )
+    assert spark.conf.get(f"fs.azure.account.oauth2.client.id.{adls_account}.dfs.core.windows.net") == os.getenv(
+        "AZURE_CLIENT_ID"
+    )
+    assert spark.conf.get(f"fs.azure.account.oauth2.client.secret.{adls_account}.dfs.core.windows.net") == os.getenv(
+        "AZURE_CLIENT_SECRET"
+    )
+    assert (
+        spark.conf.get(f"fs.azure.account.oauth2.client.endpoint.{adls_account}.dfs.core.windows.net")
+        == f"https://login.microsoftonline.com/{os.getenv('AZURE_TENANT_ID')}/oauth2/token"
+    )
 
 
 @pytest.mark.parametrize(
@@ -24,8 +114,10 @@ from stacks.data.pyspark.etl import (
         ),
     ],
 )
-@patch("stacks.data.pyspark.etl.get_adls_file_url")
-def test_save_files_as_delta_tables(mock_get_adls_file_url, spark, csv_files, expected_columns, tmp_path):
+@patch("stacks.data.azure.adls.AdlsClient.get_adls_file_url")
+def test_save_files_as_delta_tables(
+    mock_get_adls_file_url, mock_adls_client, spark, csv_files, expected_columns, tmp_path
+):
     def side_effect(container, file_name):
         if container == BRONZE_CONTAINER:
             # fixed path for test input files
@@ -37,7 +129,9 @@ def test_save_files_as_delta_tables(mock_get_adls_file_url, spark, csv_files, ex
     mock_get_adls_file_url.side_effect = side_effect
 
     spark_read_options = {"header": "true", "inferSchema": "true", "delimiter": ","}
-    save_files_as_delta_tables(spark, csv_files, "csv", BRONZE_CONTAINER, SILVER_CONTAINER, spark_read_options)
+    save_files_as_delta_tables(
+        spark, mock_adls_client, csv_files, "csv", BRONZE_CONTAINER, SILVER_CONTAINER, spark_read_options
+    )
 
     for i, csv_file in enumerate(csv_files):
         filename_with_no_extension = Path(csv_file).stem
@@ -57,9 +151,9 @@ def test_save_files_as_delta_tables(mock_get_adls_file_url, spark, csv_files, ex
         ("delta", {}, {}),
     ],
 )
-@patch("stacks.data.pyspark.etl.get_adls_file_url")
+@patch("stacks.data.azure.adls.AdlsClient.get_adls_file_url")
 def test_save_files_as_delta_tables_different_formats(
-    mock_get_adls_file_url, spark, tmp_path, file_format, write_options, read_options
+    mock_get_adls_file_url, mock_adls_client, spark, tmp_path, file_format, write_options, read_options
 ):
     def side_effect(container, file_name):
         if container == BRONZE_CONTAINER:
@@ -78,7 +172,9 @@ def test_save_files_as_delta_tables_different_formats(
         filepath = side_effect(BRONZE_CONTAINER, file)
         df.write.options(**write_options).format(file_format).save(filepath)
 
-    save_files_as_delta_tables(spark, test_files, file_format, BRONZE_CONTAINER, SILVER_CONTAINER, read_options)
+    save_files_as_delta_tables(
+        spark, mock_adls_client, test_files, file_format, BRONZE_CONTAINER, SILVER_CONTAINER, read_options
+    )
 
     for file in test_files:
         expected_filepath = side_effect(SILVER_CONTAINER, file)
@@ -87,7 +183,7 @@ def test_save_files_as_delta_tables_different_formats(
         assert df_read.columns == ["Name", "Score"]  # same column names
 
 
-def test_read_latest_rundate_data(spark, tmp_path):
+def test_read_latest_rundate_data(spark, mock_adls_client, tmp_path):
     def mock_get_adls_directory_contents(*args, **kwargs):
         return os.listdir(tmp_path)
 
@@ -109,10 +205,10 @@ def test_read_latest_rundate_data(spark, tmp_path):
         df.write.format("delta").mode("overwrite").save(str(data_path))
 
     with patch(
-        "stacks.data.pyspark.etl.get_adls_directory_contents", side_effect=mock_get_adls_directory_contents
-    ), patch("stacks.data.pyspark.etl.get_adls_file_url", side_effect=mock_get_adls_file_url):
+        "stacks.data.azure.adls.AdlsClient.get_adls_directory_contents", side_effect=mock_get_adls_directory_contents
+    ), patch("stacks.data.azure.adls.AdlsClient.get_adls_file_url", side_effect=mock_get_adls_file_url):
 
-        df = read_latest_rundate_data(spark, "dummy", str(tmp_path), "delta")
+        df = read_latest_rundate_data(spark, mock_adls_client, "dummy", str(tmp_path), "delta")
 
         assert df.columns == ["Id", "Name", "Directory"]
         rows = df.collect()
@@ -120,7 +216,7 @@ def test_read_latest_rundate_data(spark, tmp_path):
         assert rows[0].Directory == "rundate=2023-08-18T090129.2247Z"
 
 
-def test_transform_and_save_as_delta(spark, tmp_path):
+def test_transform_and_save_as_delta(spark, mock_adls_client, tmp_path):
     input_data = [(1, "Alice"), (2, "Bob")]
     input_df = spark.createDataFrame(input_data, ["Id", "Name"])
 
@@ -130,8 +226,8 @@ def test_transform_and_save_as_delta(spark, tmp_path):
     output_file_name = "test_delta_table"
     expected_output_path = str(tmp_path / output_file_name)
 
-    with patch("stacks.data.pyspark.etl.get_adls_file_url", return_value=expected_output_path):
-        transform_and_save_as_delta(spark, input_df, mock_transform, str(tmp_path), output_file_name)
+    with patch("stacks.data.azure.adls.AdlsClient.get_adls_file_url", return_value=expected_output_path):
+        transform_and_save_as_delta(spark, mock_adls_client, input_df, mock_transform, str(tmp_path), output_file_name)
 
     saved_df = spark.read.format("delta").load(expected_output_path)
 
@@ -140,27 +236,3 @@ def test_transform_and_save_as_delta(spark, tmp_path):
     assert len(rows) == 2
     assert rows[0].NewCol == 2
     assert rows[1].NewCol == 3
-
-
-def test_get_data_factory_param():
-    with patch.object(sys, "argv", ["script.py", "test_value"]):
-        result = get_data_factory_param(1, "default_value")
-        assert result == "test_value"
-
-
-def test_get_data_factory_param_default():
-    with patch.object(sys, "argv", ["script.py"]):
-        result = get_data_factory_param(1, "default_value")
-        assert result == "default_value"
-
-
-def test_get_data_factory_param_bool():
-    with patch.object(sys, "argv", ["script.py", "True"]):
-        result = get_data_factory_param(1, default_value=False, convert_bool=True)
-        assert result is True
-
-
-def test_get_data_factory_param_bool_false():
-    with patch.object(sys, "argv", ["script.py", "False"]):
-        result = get_data_factory_param(1, default_value=True, convert_bool=True)
-        assert result is False
