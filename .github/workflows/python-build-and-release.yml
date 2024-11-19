@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'tests/**'
+    paths:
+      - 'stacks/**'
+      - 'de_workloads/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
   workflow_dispatch:
 
 jobs:
