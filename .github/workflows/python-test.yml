@@ -39,6 +39,14 @@ jobs:
         run: |
           python -m poetry install
 
+      - name: Run pre-commit hooks
+        run: |
+          python -m poetry run pre-commit run --all-files
+
+      - name: Run tests
+        run: |
+          python -m poetry run pytest
+
       - name: Build Python Project
         run: |
           poetry build
