@@ -77,6 +77,11 @@ jobs:
             echo "::set-output name=should_release::false"
           fi
 
+      - name: Build Python Project
+        if: steps.version_check.outputs.should_release == 'true'
+        run: |
+          poetry build
+
       - name: Create GitHub Release Tag
         if: steps.version_check.outputs.should_release == 'true'
         env:
@@ -86,11 +91,6 @@ jobs:
           git tag "v$NEW_TAG"
           git push origin "v$NEW_TAG"
           gh release create "v$NEW_TAG" --title "Release v$NEW_TAG" --notes "Automated release of version $NEW_TAG"
-
-      - name: Build Python Project
-        if: steps.version_check.outputs.should_release == 'true'
-        run: |
-          poetry build
 
       - name: Publish to PyPi Test
         if: steps.version_check.outputs.should_release == 'true'
