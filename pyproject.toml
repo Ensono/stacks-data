@@ -50,6 +50,14 @@ datastacks = "stacks.data.cli.datastacks_cli:cli"
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"
+filterwarnings = [
+    # Ignore warning for use of typing.io in Pyspark
+    "ignore: typing.io is deprecated:DeprecationWarning",
+
+    # Ignore warnings for deprecated modules in Great expectations
+    "ignore: module 'sre_constants' is deprecated:DeprecationWarning",
+    "ignore: module 'sre_parse' is deprecated:DeprecationWarning",
+]
 
 [tool.black]
     line-length = 120
