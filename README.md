@@ -14,7 +14,7 @@ The following features require additional dependencies, which can be optionally 
 
 * **behave**: Utilities for executing behaviour-driven development (BDD) tests.
 * **cli**: The [datastacks](https://stacks.ensono.com/docs/workloads/azure/data/data_engineering/datastacks) command line tool, to support developers generating data workloads.
-* **data_quality**: Utilities for running data quality checks using the Great Expectations framework.
+* **data-quality**: Utilities for running data quality checks using the Great Expectations framework.
 
 You can install the stacks-data package using pip - see the examples below:
 
@@ -23,8 +23,8 @@ You can install the stacks-data package using pip - see the examples below:
 pip install stacks-data
 
 # Example 2: Install the stacks-data package with data quality features included
-pip install stacks-data[data_quality]
+pip install stacks-data[data-quality]
 
 # Example 3: Install the stacks-data package with all optional features included
-pip install stacks-data[behave,cli,data_quality]
+pip install stacks-data[behave,cli,data-quality]
 ```
