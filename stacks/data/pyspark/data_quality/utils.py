@@ -24,7 +24,7 @@ try:
 except ImportError:
     raise ImportError(
         "Required dependencies for Stacks Data Quality are not installed. "
-        "Please install them using: pip install stacks-data[data_quality]"
+        "Please install them using: pip install stacks-data[data-quality]"
     )
 
 logger = logging.getLogger(__name__)
