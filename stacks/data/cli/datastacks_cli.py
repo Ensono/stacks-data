@@ -4,7 +4,6 @@ This module provides command-line interfaces to generate and manage data workloa
 """
 import logging
 
-
 from stacks.data.constants import CONFIG_CONTAINER_NAME
 from stacks.data.pyspark.data_quality.main import data_quality_main
 from stacks.data.logger import setup_logger
