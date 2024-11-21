@@ -6,7 +6,6 @@ workloads.
 import json
 import uuid
 from datetime import datetime
-import polling2
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
 
@@ -27,6 +26,7 @@ from stacks.data.azure.adls import AdlsClient
 try:
     from behave import given, step, then
     from behave.runner import Context
+    import polling2
 except ImportError:
     raise ImportError(
         "Required dependencies for Stacks Data Behave testing are not installed. "
