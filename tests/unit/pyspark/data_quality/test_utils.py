@@ -268,7 +268,6 @@ def test_publish_quality_results_table(mocker, spark, expectation_results):
     ],
 )
 
-@pytest.mark.skip(reason="Need to investigate why this is failing...")
 def test_replace_adls_data_location(adls_location, data_path, expected):
     result = replace_adls_data_location(adls_location, data_path)
     assert result == expected
