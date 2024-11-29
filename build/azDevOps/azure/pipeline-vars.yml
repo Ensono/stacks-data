@@ -1,0 +1,39 @@
+variables:
+  - name: git_integration
+    value: null # github removed github integration with ADF
+  - name: git_integration_prod
+    value: null
+  - name: sql_admin_login
+    value: mssqladmin
+
+  # SelfConfig
+  # If you haven't specified source_repo at cli runtime please ensure you replace it here
+  # It is case sensitive for TFS based repos
+  # - name: self_repo_src
+  #   value: src/api
+  - name: self_repo_dir
+    value: "$(Agent.BuildDirectory)/s/$(self_repo)"
+  - name: self_repo_tf_src
+    value: deploy/azure/infra
+  - name: self_repo_tf_dir
+    value: "$(self_repo_dir)/$(self_repo_tf_src)"
+
+  # Versioning
+  - name: version_revision
+    value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
+  - name: version_number
+    value: $(version_major).$(version_minor).$(version_revision)
+
+  # GitHub infomration
+  - name: create_release
+    value: false
+
+  # -------- Network Domain names
+  - name: base_domain_nonprod
+    value: nonprod.stacks.ensono.com
+  - name: base_domain_internal_nonprod
+    value: nonprod.stacks.ensono.internal
+  - name: base_domain_prod
+    value: prod.stacks.ensono.com
+  - name: base_domain_internal_prod
+    value: prod.stacks.ensono.internal

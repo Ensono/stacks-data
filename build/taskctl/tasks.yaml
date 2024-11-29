@@ -1,0 +1,208 @@
+tasks:
+  buildnumber:
+    context: powershell
+    description: Update the build number
+    command:
+      - Update-BuildNumber
+
+  lint:precommit:
+    context: powershell
+    description: Perform Pre-Commit linting
+    command:
+      - git config --global --add safe.directory /app && pre-commit run --all-files --show-diff-on-failure
+
+  lint:yaml:
+    context: powershell
+    description: Perform YAML linting
+    command:
+      - Invoke-YamlLint -FailOnWarnings $False
+
+  lint:terraform:format:
+    context: powershell
+    description: Perform Terraform format check
+    command:
+      - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION -Debug
+
+  lint:terraform:validate:
+    context: powershell
+    description: Perform Terraform validation
+    command:
+      - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION
+
+  # Infrastructure tasks
+  infra:init:
+    context: powershell
+    description: Initialise Terraform for Azure
+    command:
+      - Invoke-Terraform -Init -backend "$env:TF_BACKEND_INIT" -Path $env:TF_FILE_LOCATION -Debug
+      - Invoke-Terraform -Workspace -Arguments $env:ENV_NAME -Path $env:TF_FILE_LOCATION -Debug
+
+  infra:vars:
+    context: powershell
+    description: Create Terraform variables file
+    command:
+      - /app/build/scripts/Set-TFVars.ps1 | Tee-Object -FilePath "${env:TF_FILE_LOCATION}/terraform.tfvars"
+
+  infra:plan:
+    context: powershell
+    description: Plan Terraform
+    command:
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-input=false","-out=tfplan" | Out-Null
+
+  infra:apply:
+    context: powershell
+    description: Apply Terraform Plan
+    command:
+      - Push-Location $env:TF_FILE_LOCATION && Invoke-Terraform -Apply -Path tfplan -Debug
+
+  infra:destroy:plan:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command:
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-destroy,${env:TF_BACKEND_DESTROY_PLAN}" -debug | Out-Null
+
+  infra:destroy:apply:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command: /app/build/scripts/Remove-Environment.ps1
+
+  publish:github:
+    context: powershell
+    description: Publish Release to GitHub
+    command:
+      - Publish-GitHubRelease -artifactsList "$env:ARTIFACTS_LIST"
+    env:
+      generateReleaseNotes: $true
+      # PUBLISH_RELEASE: $true
+
+  update:dashboard:
+    context: powershell
+    description: Update the Deployment Dashboard
+    command:
+      - Update-InfluxDashboard
+    # yamllint disable rule:comments-indentation
+    # env:
+    # PUBLISH_RELEASE: $true
+    # yamllint enable rule:comments-indentation
+
+  debug:env:
+    context: powershell
+    description: Debugging task to show the environment variables in the container
+    command:
+      - dir env:/
+
+  debug:location:
+    context: powershell
+    command:
+      - Write-Host "***** DEBUG *****" && get-childitem -filter "*opencover.xml" -recurse
+
+  debug:sleep:
+    context: powershell-python
+    command:
+      - echo "Sleeping for {{ .sleep }}"
+      - sleep {{ .sleep }}
+    variables:
+      sleep: 3000
+
+  # The following tasks are used to setup a local environment using the information in the stage_envvars.yml file
+  setup:dev:
+    context: powershell
+    description: Create a shell script to configure the environment variables
+    command:
+      - New-EnvConfig -Path /app/build/config/stage_envvars.yml -ScriptPath /app/local
+
+  setup:environment:
+    context: powershell
+    description: Ensure that the environment is configured correctly
+    command:
+      - Confirm-Environment -Path /app/build/config/stage_envvars.yml
+
+  # Databricks tasks
+  databricks:connect:
+    context: powershell-data
+    description: Configure databricks-cli
+    command:
+      - |
+        Write-Output "`nConfigure databricks-cli"
+        Set-Content -Path adb_token -Value $env:DATABRICKS_TOKEN
+        & databricks configure --token-file adb_token --host $env:DATABRICKS_HOST
+        Write-Output "`nDebug:Databricks workspace list:"
+        & databricks workspace list
+
+  databricks:createdir:
+    context: powershell-data
+    description: Create DBFS Dir If Not Exists
+    command:
+      - |
+        Write-Output "
+        Create DBFS Dir If Not Exists"
+        $destinationPath=$env:DATABRICKS_DBFS_LOCATION
+        Write-Output "Required DBFS destination is $destinationPath"
+        $folderExists = $(databricks fs ls $destinationPath 2>&1)
+        if ($folderExists -like "*No file or directory exists*") {
+            Write-Output "Required DBFS directory doesnot Exists.Creating Now"
+            # $(databricks fs mkdirs $destinationPath)
+        }
+        else {
+            Write-Output "Required DBFS directory Exists"
+        }
+
+  databricks:upload:
+    context: powershell-data
+    description: Upload Spark Jobs or Whl to DBFS
+    command:
+      # - Push-Location $env:TF_FILE_LOCATION && Invoke-Terraform -Apply -Path tfplan -Debug
+      - |
+        Write-Output "
+        Upload Spark Jobs or Whl to DBFS"
+        $destinationPath=$env:DATABRICKS_DBFS_LOCATION
+        $databricks_source_path=$env:DATABRICKS_SOURCE_LOCATION
+        Write-Output "DBFS destination is $destinationPath"
+        Write-Output "DBFS Source File location is $databricks_source_path"
+
+         $files = Get-ChildItem -Path $databricks_source_path
+         foreach ($file in $files) {
+             if ($file -is [System.IO.FileInfo]) {
+                 Write-Output  $file.Name
+                 $destination = "$destinationPath/$($file.Name)"
+                 & databricks fs cp --overwrite "$($file.FullName)" "$destination"
+             }
+         }
+
+  # Deworkload Testing tasks
+  deworkload:Testing:
+    context: powershell-data
+    description: Deworkload Unit Testing
+    command:
+      - |
+        cd $env:WORKING_DIRECTORY
+        poetry install
+        Write-Output "======================== Running Unit Tests ======================== "
+        cd $env:WORKING_DIRECTORY
+        python3 -m pytest $env:UNIT_TEST_LOCATION
+        Start-Sleep -Seconds 30
+        Write-Output "======================== End Unit Tests ======================== "
+        Write-Output " "
+
+        Write-Output "======================== Running e2e Tests ======================== "
+        $e2eTestLocation = $env:E2E_TEST_LOCATION
+        if (Test-Path $e2eTestLocation -PathType Container) {
+
+            $junitLocation = $env:JUNIT_LOCATION
+            poetry run behave $e2eTestLocation --junit --junit-directory $junitLocation
+        } else {
+            Write-Host "Skipping E2E tests: The specified E2E_TEST_LOCATION directory '$e2eTestLocation' does not exist."
+        }
+
+  install:poetry:
+    context: powershell-python
+    description: Ensure that the environment is configured correctly
+    command:
+      - |
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+        poetry config installer.max-workers 10
+        python3 -m poetry install --no-interaction
+        python3 -m poetry run pre-commit run --all-files
+        python3 -m poetry run pytest
+        poetry build

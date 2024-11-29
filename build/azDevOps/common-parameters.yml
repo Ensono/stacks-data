@@ -1,0 +1,27 @@
+- name: force_deploy
+  displayName: Force deploy regardless of branch
+  type: boolean
+  default: false
+- name: deploy
+  displayName: Deploy Environment
+  type: boolean
+  default: true
+- name: destroy
+  displayName: Destroy Environment
+  type: boolean
+  default: false
+- name: stages
+  type: object
+  default:
+    - stage: NonProd
+      dependsOn: Build
+      condition: ne(variables['Build.SourceBranch'], 'refs/heads/main')
+      environment_shortname: nonprod
+    - stage: Prod
+      dependsOn: Build
+      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      environment_shortname: prod
+- name: debug
+  displayName: Turn on debug for the Independent Runner
+  type: boolean
+  default: false

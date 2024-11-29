@@ -1,0 +1,11 @@
+variables:
+  # Versioning
+  - name: version_major
+    value: 1
+  - name: version_minor
+    value: 0
+  - name: version_revision
+    value: 0
+    # value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
+    # - name: version_number
+    #   value: $(version_major).$(version_minor).$(version_revision)
