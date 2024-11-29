@@ -16,7 +16,7 @@ variables:
 stages:
   - stage: Build
     jobs:
-      - job: Validate
+      - job: Build
         pool:
           vmImage: $(pool_vm_image)
 
@@ -55,16 +55,19 @@ stages:
               DOCKER_IMAGE_TAG: $(version_number)
 
           - task: Bash@3
+            displayName: "TaskCTL: Lint"
+            inputs:
+              targetType: inline
+              script: taskctl lint
+
+          - task: Bash@3
             displayName: "TaskCTL: Test"
             inputs:
               targetType: inline
-              script: taskctl install:poetry
+              script: taskctl test
 
-          # - task: Bash@3
-          #   displayName: "TaskCTL: Lint"
-          #   inputs:
-          #     targetType: inline
-          #     script: taskctl lint
-          #   env:
-          #     TF_FILE_LOCATION: /app/$(self_repo_tf_src)
-          #     CLOUD_PLATFORM: "$(cloud_platform)"
+          - task: Bash@3
+            displayName: "TaskCTL: Build"
+            inputs:
+              targetType: inline
+              script: taskctl build

@@ -267,7 +267,6 @@ def test_publish_quality_results_table(mocker, spark, expectation_results):
         ("not_an_adls_uri", "test", "not_an_adls_uri"),
     ],
 )
-
 def test_replace_adls_data_location(adls_location, data_path, expected):
     result = replace_adls_data_location(adls_location, data_path)
     assert result == expected
