@@ -10,6 +10,7 @@ tasks:
     description: Ensure that the poetry is configured correctly
     command:
       - |
+        sed -i -e 's/.*version.*/version=\"${DOCKER_IMAGE_TAG}\"/g' pyproject.toml
         poetry config virtualenvs.create true --local
         poetry config virtualenvs.in-project true --local
         poetry config installer.max-workers 10
@@ -23,16 +24,17 @@ tasks:
 
   poetry:test:
     context: powershell
-    description: Ensure that the environment is configured correctly
+    description: Run Tests
     command:
       - |
+        #TODO: Remove the installation of java into docker image
         apt-get update
         apt-get install openjdk-8-jdk-headless -qq
         python3 -m poetry run pytest
 
   poetry:build:
     context: powershell
-    description: Ensure that the environment is configured correctly
+    description: Build package
     command:
       - git config --global --add safe.directory /app && poetry build
 
