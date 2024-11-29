@@ -97,12 +97,12 @@ tasks:
       - Write-Host "***** DEBUG *****" && get-childitem -filter "*opencover.xml" -recurse
 
   debug:sleep:
-    context: powershell-python
+    context: powershell
     command:
       - echo "Sleeping for {{ .sleep }}"
       - sleep {{ .sleep }}
     variables:
-      sleep: 3000
+      sleep: 30
 
   # The following tasks are used to setup a local environment using the information in the stage_envvars.yml file
   setup:dev:
@@ -195,7 +195,7 @@ tasks:
         }
 
   install:poetry:
-    context: powershell-python
+    context: powershell
     description: Ensure that the environment is configured correctly
     command:
       - |
