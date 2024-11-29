@@ -207,4 +207,5 @@ tasks:
         python3 -m poetry install --no-interaction
         python3 -m poetry run pre-commit run --all-files
         python3 -m poetry run pytest
+        git config --global --add safe.directory /app
         poetry build
