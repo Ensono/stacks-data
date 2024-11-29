@@ -24,7 +24,7 @@ stages:
           - task: UsePythonVersion@0
             displayName: Set Python Version
             inputs:
-              versionSpec: ${{ parameters.pythonVersion }}
+              versionSpec: ${{ variables.pythonVersion }}
               addToPath: true
 
           - task: Bash@3
@@ -41,7 +41,6 @@ stages:
                 #pip install poetry
                 #poetry self add poetry-dotenv-plugin
                 #poetry install
-              workingDirectory: "${{ parameters.workingDirectory }}"
 
           # - template: ../templates/setup.yml
           #   parameters:
