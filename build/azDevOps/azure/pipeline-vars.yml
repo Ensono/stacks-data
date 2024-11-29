@@ -1,16 +1,4 @@
 variables:
-  - name: git_integration
-    value: null # github removed github integration with ADF
-  - name: git_integration_prod
-    value: null
-  - name: sql_admin_login
-    value: mssqladmin
-
-  # SelfConfig
-  # If you haven't specified source_repo at cli runtime please ensure you replace it here
-  # It is case sensitive for TFS based repos
-  # - name: self_repo_src
-  #   value: src/api
   - name: self_repo_dir
     value: "$(Agent.BuildDirectory)/s/$(self_repo)"
   - name: self_repo_tf_src
@@ -19,6 +7,12 @@ variables:
     value: "$(self_repo_dir)/$(self_repo_tf_src)"
 
   # Versioning
+  - name: version_major
+    value: 1
+  - name: version_minor
+    value: 0
+  - name: version_revision
+    value: 0
   - name: version_revision
     value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
   - name: version_number
@@ -28,12 +22,19 @@ variables:
   - name: create_release
     value: false
 
-  # -------- Network Domain names
-  - name: base_domain_nonprod
-    value: nonprod.stacks.ensono.com
-  - name: base_domain_internal_nonprod
-    value: nonprod.stacks.ensono.internal
-  - name: base_domain_prod
-    value: prod.stacks.ensono.com
-  - name: base_domain_internal_prod
-    value: prod.stacks.ensono.internal
+  # Agent configuration
+  - name: TaskctlVersion
+    value: 1.5.3
+  - name: pool_vm_image
+    value: ubuntu-22.04
+  - name: agentpool_name
+    value: ensono-stacks-data-build
+
+  # Service Connections
+  - name: service_connection
+    value: Ensono.Stacks.Pipeline.Builds
+  - name: github_release_service_connection
+    value: GitHubReleases
+
+  - name: pythonVersion
+    value: "3.10"
