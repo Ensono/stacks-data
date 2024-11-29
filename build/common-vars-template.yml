@@ -1,0 +1,46 @@
+variables:
+  - name: region
+    value: "{{ .Project.Cloud.Region }}"
+  - name: company
+    value: "{{ .Input.Business.Company }}"
+  - name: project
+    value: "{{ .Project.Name }}"
+  - name: domain
+    value: "{{ .Input.Business.Domain }}"
+  - name: cloud_platform
+    value: "{{ .Input.Cloud.Platform }}"
+  - name: component
+    value: "{{ .Input.Business.Component }}"
+  - name: self_repo
+    value: "{{ .Project.Name }}"
+  # Terraform Configuration
+
+  # State configuration
+
+  # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
+  # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
+  # there are some best practices around this if you are going for feature based environments
+  # avoid running anything past dev that is not on master
+  - name: tf_state_rg
+    value: "{{ .Input.Terraform.Backend.Group }}"
+  - name: tf_state_storage
+    value: "{{ .Input.Terraform.Backend.Storage }}"
+  - name: tf_state_container
+    value: "{{ .Input.Terraform.Backend.Container }}"
+
+  # Agent configuration
+  - name: TaskctlVersion
+    value: 1.5.2
+  - name: pool_vm_image
+    value: ubuntu-22.04
+  - name: agentpool_name
+    value: "amido-stacks-core-data-agent-pool"
+
+  # Service Connections
+  - name: service_connection
+    value: Stacks.Pipeline.Builds
+  - name: github_release_service_connection
+    value: GitHubReleases
+
+  - name: pythonVersion
+    value: "3.10"

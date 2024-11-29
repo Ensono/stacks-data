@@ -1,0 +1,50 @@
+# Import contexts and tasks for Taskctl
+import:
+  - ./build/taskctl/contexts.yaml
+  - ./build/taskctl/tasks.yaml
+
+watchers:
+  lint:
+    watch:
+      - "*.yml"
+      - "*.yaml"
+    events: [create, write]
+    task: lint:yaml
+
+pipelines:
+  setup:
+    - task: buildnumber
+
+  lint:
+    - task: lint:yaml
+    - task: lint:terraform:validate
+
+  # Pipeline to ensure that the infrastructure is valid
+  infrastructure:
+    - task: infra:init
+    - task: infra:plan
+      depends_on: infra:init
+
+  infrastructure_destroy:
+    - task: infra:init
+    - task: infra:destroy:plan
+      depends_on:
+        - infra:init
+    - task: infra:destroy:apply
+      depends_on:
+        - infra:destroy:plan
+
+  infrastructurePlan:
+    - task: infra:init
+    - task: infra:plan
+      depends_on: infra:init
+
+  databricks:
+    - task: databricks:connect
+    - task: databricks:createdir
+      depends_on: databricks:connect
+    - task: databricks:upload
+      depends_on: databricks:createdir
+
+  deworkloadTesting:
+    - task: deworkload:Testing
