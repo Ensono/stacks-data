@@ -51,7 +51,9 @@ tasks:
     context: powershell
     description: Publish Release to GitHub
     command:
-      - Publish-GitHubRelease -generateReleaseNotes $true
+      - |
+        Set-PSDebug -Trace 1
+        Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
 
   debug:env:
     context: powershell

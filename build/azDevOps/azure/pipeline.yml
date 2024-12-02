@@ -77,3 +77,4 @@ stages:
             env:
               REPO_URL: $(repo)
               TOKEN: $(token)
+              VERSION_NUMBER: $(version_number)
