@@ -15,7 +15,9 @@ variables:
   - name: version_revision
     value: 0
   - name: version_revision
-    value: $[counter(format('{0}{1}{2}', variables['Build.SourceBranchName'], variables['version_major'], variables['version_minor']),0)]
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: $[counter(format('{0}{1}{2}', variables['Build.SourceBranchName'], variables['version_major'], variables['version_minor']),0)]
+      
   - name: stability
     ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
       value: ".dev$(Rev.R)"
