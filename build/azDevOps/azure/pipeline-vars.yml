@@ -6,6 +6,7 @@ variables:
   - name: self_repo_tf_dir
     value: "$(self_repo_dir)/$(self_repo_tf_src)"
 
+
   # Versioning
   - name: version_major
     value: 1
@@ -15,8 +16,11 @@ variables:
     value: 0
   - name: version_revision
     value: $[counter(join(variables['version_major'], join('-', variables['version_minor']), join('-', variables['Build.SourceBranchName'])), 0)]
+  - name: stability
+    ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      value: "-unstable"
   - name: version_number
-    value: $(version_major).$(version_minor).$(version_revision)
+    value: $(version_major).$(version_minor).$(version_revision)$(stability)
 
   # GitHub infomration
   - name: create_release
