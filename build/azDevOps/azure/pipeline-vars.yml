@@ -18,11 +18,9 @@ variables:
     value: $[counter(format('{0}{1}{2}', variables['Build.SourceBranchName'], variables['version_major'], variables['version_minor']),0)]
   - name: stability
     ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      value: "dev"
-    ${{ else }}:
-      value: ""
+      value: ".dev$(Rev.R)"
   - name: version_number
-    value: $(version_major).$(version_minor).$(stability)$(version_revision)
+    value: $(version_major).$(version_minor).$(version_revision)$(stability)
 
   # GitHub infomration
   - name: create_release
