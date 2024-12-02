@@ -6,6 +6,11 @@ variables:
   - name: self_repo_tf_dir
     value: "$(self_repo_dir)/$(self_repo_tf_src)"
 
+  - name: is_main_branch
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: true
+    ${{ else }}:
+      value: false
 
   # Versioning
   - name: version_major
@@ -15,16 +20,9 @@ variables:
   - name: version_revision
     value: 0
   - name: version_revision
-    value: $[counter(format('{0}{1}{2}', variables['Build.SourceBranchName'], variables['version_major'], variables['version_minor']),0)]
-      
-  - name: stability
-    ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      value: ".dev"
-  - name: incre
-    ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      value: $(Rev.R)
+    value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
   - name: version_number
-    value: $(version_major).$(version_minor).$(version_revision)$(stability)$(incre)
+    value: $(version_major).$(version_minor).$(version_revision)
 
   # GitHub infomration
   - name: create_release

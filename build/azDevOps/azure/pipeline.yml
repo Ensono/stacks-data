@@ -13,61 +13,61 @@ trigger:
 variables:
   - template: pipeline-vars.yml
 
+parameters:
+  - name: force_publish
+    displayName: Force a publish to the py pi repo
+    type: boolean
+    default: false
+
 stages:
   - stage: Build
+    variables:
+      - ${{ if eq(variables['is_main_branch'], 'true') }}:
+          - group: stacks-pypi-creds-prod
+      - ${{ else }}:
+          - group: stacks-pypi-creds-testW
     jobs:
-      - job: Build
-        pool:
-          vmImage: $(pool_vm_image)
+    - job: Build
+      pool:
+        vmImage: $(pool_vm_image)
 
-        steps:
-          # - task: UsePythonVersion@0
-          #   displayName: Set Python Version
-          #   inputs:
-          #     versionSpec: ${{ variables.pythonVersion }}
-          #     addToPath: true
+      steps:
+        - template: ../templates/setup.yml
+          parameters:
+            TaskctlVersion: ${{ variables.TaskctlVersion }}
 
-          # - task: Bash@3
-          #   displayName: "Create Poetry Enviroment and Install Packages"
-          #   inputs:
-          #     targetType: inline
-          #     script: |
-          #       python -m pip install poetry==1.8.3
-          #       poetry config virtualenvs.create true --local
-          #       poetry config virtualenvs.in-project true --local
-          #       python -m poetry install
-          #       echo "RUN TESTS....."
-          #       python -m poetry run pytest
-          #       #pip install poetry
-          #       #poetry self add poetry-dotenv-plugin
-          #       #poetry install
+        - task: Bash@3
+          displayName: "TaskCTL: Setup"
+          inputs:
+            targetType: inline
+            script: taskctl setup
+          env:
+            DOCKER_IMAGE_TAG: $(version_number)
 
-          - template: ../templates/setup.yml
-            parameters:
-              TaskctlVersion: ${{ variables.TaskctlVersion }}
+        - task: Bash@3
+          displayName: "TaskCTL: Lint"
+          inputs:
+            targetType: inline
+            script: taskctl lint
 
-          - task: Bash@3
-            displayName: "TaskCTL: Setup"
-            inputs:
-              targetType: inline
-              script: taskctl setup
-            env:
-              DOCKER_IMAGE_TAG: $(version_number)
+        - task: Bash@3
+          displayName: "TaskCTL: Test"
+          inputs:
+            targetType: inline
+            script: taskctl test
 
-          # - task: Bash@3
-          #   displayName: "TaskCTL: Lint"
-          #   inputs:
-          #     targetType: inline
-          #     script: taskctl lint
-
-          # - task: Bash@3
-          #   displayName: "TaskCTL: Test"
-          #   inputs:
-          #     targetType: inline
-          #     script: taskctl test
-
-          # - task: Bash@3
-          #   displayName: "TaskCTL: Build"
-          #   inputs:
-          #     targetType: inline
-          #     script: taskctl build
+        - task: Bash@3
+          displayName: "TaskCTL: Build"
+          inputs:
+            targetType: inline
+            script: taskctl build
+        
+        - task: Bash@3
+          displayName: "TaskCTL: Publish"
+          condition: and(succeeded(), or(eq(variables['force_publish'], 'true'), eq(variables['is_main_branch'], 'true')))
+          inputs:
+            targetType: inline
+            script: taskctl publish
+          env:
+            REPO_URL: $(repo)
+            TOKEN: $(token)
