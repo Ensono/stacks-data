@@ -30,7 +30,7 @@ tasks:
         #TODO: Remove the installation of java into docker image
         apt-get update
         apt-get install openjdk-8-jdk-headless -qq
-        python3 -m poetry run pytest
+        python3 -m poetry run pytest --junitxml "unit.xml"
 
   poetry:build:
     context: powershell
@@ -51,10 +51,7 @@ tasks:
     context: powershell
     description: Publish Release to GitHub
     command:
-      - Publish-GitHubRelease -artifactsList "$env:ARTIFACTS_LIST"
-    env:
-      generateReleaseNotes: $true
-      # PUBLISH_RELEASE: $true
+      - Publish-GitHubRelease -generateReleaseNotes $true
 
   debug:env:
     context: powershell

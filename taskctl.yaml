@@ -15,3 +15,4 @@ pipelines:
     - task: poetry:build
   publish:
     - task: poetry:publish
+    - task: publish:github
