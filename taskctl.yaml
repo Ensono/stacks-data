@@ -13,3 +13,5 @@ pipelines:
     - task: poetry:test
   build:
     - task: poetry:build
+  publish:
+    - task: poetry:publish
