@@ -15,7 +15,7 @@ variables:
 
 parameters:
   - name: force_publish
-    displayName: Force a publish to the py pi repo
+    displayName: Force publish to the python repository
     type: boolean
     default: false
 
@@ -64,7 +64,7 @@ stages:
 
           - task: Bash@3
             displayName: "TaskCTL: Publish"
-            condition: and(succeeded(), or(eq(variables['force_publish'], 'true'), eq(variables['is_main_branch'], 'true')))
+            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl publish
