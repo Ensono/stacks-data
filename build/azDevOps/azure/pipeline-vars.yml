@@ -18,7 +18,7 @@ variables:
     value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
   - name: stability
     ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-      value: ".dev[counter(variables['Build.SourceBranchName'],0)]"
+      value: join('.dev', $[counter(variables['Build.SourceBranchName'],0)])
   - name: version_number
     value: $(version_major).$(version_minor).$(version_revision)$(stability)
 
