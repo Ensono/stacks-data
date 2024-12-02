@@ -16,11 +16,13 @@ variables:
     value: 0
   - name: version_revision
     value: $[counter(format('{0}{1}{2}', variables['Build.SourceBranchName'], variables['version_major'], variables['version_minor']),0)]
-  #- name: stability
-  #  ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
-  #    value: join('.dev', $[counter(variables['Build.SourceBranchName'],0)])
+  - name: stability
+    ${{ if ne(variables['Build.SourceBranchName'], 'main') }}:
+      value: "dev"
+    ${{ else }}:
+      value: ""
   - name: version_number
-    value: $(version_major).$(version_minor).$(version_revision)
+    value: $(version_major).$(version_minor).$(stability)$(version_revision)
 
   # GitHub infomration
   - name: create_release
