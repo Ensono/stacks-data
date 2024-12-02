@@ -55,6 +55,12 @@ stages:
             inputs:
               targetType: inline
               script: taskctl test
+          
+          - task: PublishTestResults@2
+            displayName: "Publish Test Results"
+            inputs:
+              testResultsFiles: "*.xml"
+            condition: succeededOrFailed()
 
           - task: Bash@3
             displayName: "TaskCTL: Build"
@@ -71,3 +77,17 @@ stages:
             env:
               REPO_URL: $(repo)
               TOKEN: $(token)
+
+          - task: GitHubRelease@1
+            displayName: Create GitHub Release
+            condition: and(succeeded(), eq(variables['is_main_branch'], 'true'))
+            inputs:
+              gitHubConnection: $(github_release_service_connection)
+              repositoryName: "$(Build.Repository.Name)"
+              tag: v${newVersion}
+              releaseNotesSource: "inline"
+              releaseNotesInline: "$(major).$(minor).$(revision)"
+              tagSource: "gitTag"
+              changeLogCompareToRelease: "lastFullRelease"
+              changeLogType: "commitBased"
+            condition: eq(variables['ShouldCreateRelease'], 'true')
