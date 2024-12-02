@@ -44,9 +44,9 @@ tasks:
     command:
       - |
         # Add test PyPI to your poetry config repositories with the name test-pypi
-        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry config repositories.test-pypi $REPO_URL/legacy/
         # Add an API token for test PyPi
-        poetry config pypi-token.test-pypi <your-token>
+        poetry config pypi-token.test-pypi $TOKEN
         # You can now publish to test-pypi using the following
         poetry publish -r test-pypi
 
