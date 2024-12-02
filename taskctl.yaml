@@ -6,7 +6,7 @@ import:
 pipelines:
   setup:
     - task: buildnumber
-    - task: poetry:setup
+    # - task: poetry:setup
   lint:
     - task: poetry:lint
   test:
@@ -14,5 +14,5 @@ pipelines:
   build:
     - task: poetry:build
   publish:
-    - task: poetry:publish
+    # - task: poetry:publish
     - task: publish:github
