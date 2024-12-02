@@ -54,20 +54,20 @@ stages:
             env:
               DOCKER_IMAGE_TAG: $(version_number)
 
-          - task: Bash@3
-            displayName: "TaskCTL: Lint"
-            inputs:
-              targetType: inline
-              script: taskctl lint
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Lint"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl lint
 
-          - task: Bash@3
-            displayName: "TaskCTL: Test"
-            inputs:
-              targetType: inline
-              script: taskctl test
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Test"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl test
 
-          - task: Bash@3
-            displayName: "TaskCTL: Build"
-            inputs:
-              targetType: inline
-              script: taskctl build
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Build"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl build

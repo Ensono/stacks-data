@@ -14,7 +14,7 @@ variables:
   - name: version_revision
     value: 0
   - name: version_revision
-    value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
+    value: $[counter(join(variables['version_major'], join('-', variables['version_minor']), join('-', variables['Build.SourceBranchName'])), 0)]
   - name: version_number
     value: $(version_major).$(version_minor).$(version_revision)
 
