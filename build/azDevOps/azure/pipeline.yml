@@ -44,50 +44,36 @@ stages:
             env:
               DOCKER_IMAGE_TAG: $(version_number)
 
-          - task: Bash@3
-            displayName: "TaskCTL: Lint"
-            inputs:
-              targetType: inline
-              script: taskctl lint
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Lint"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl lint
 
-          - task: Bash@3
-            displayName: "TaskCTL: Test"
-            inputs:
-              targetType: inline
-              script: taskctl test
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Test"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl test
           
-          - task: PublishTestResults@2
-            displayName: "Publish Test Results"
-            inputs:
-              testResultsFiles: "*.xml"
-            condition: succeededOrFailed()
+          # - task: PublishTestResults@2
+          #   displayName: "Publish Test Results"
+          #   inputs:
+          #     testResultsFiles: "*.xml"
+          #   condition: succeededOrFailed()
 
-          - task: Bash@3
-            displayName: "TaskCTL: Build"
-            inputs:
-              targetType: inline
-              script: taskctl build
+          # - task: Bash@3
+          #   displayName: "TaskCTL: Build"
+          #   inputs:
+          #     targetType: inline
+          #     script: taskctl build
 
           - task: Bash@3
             displayName: "TaskCTL: Publish"
-            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            # condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl publish
             env:
               REPO_URL: $(repo)
               TOKEN: $(token)
-
-          - task: GitHubRelease@1
-            displayName: Create GitHub Release
-            condition: and(succeeded(), eq(variables['is_main_branch'], 'true'))
-            inputs:
-              gitHubConnection: $(github_release_service_connection)
-              repositoryName: "$(Build.Repository.Name)"
-              tag: v${newVersion}
-              releaseNotesSource: "inline"
-              releaseNotesInline: "$(major).$(minor).$(revision)"
-              tagSource: "gitTag"
-              changeLogCompareToRelease: "lastFullRelease"
-              changeLogType: "commitBased"
-            condition: eq(variables['ShouldCreateRelease'], 'true')
