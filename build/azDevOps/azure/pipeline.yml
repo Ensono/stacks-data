@@ -25,7 +25,7 @@ stages:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
           - group: stacks-pypi-creds-prod
       - ${{ else }}:
-          - group: stacks-pypi-creds-testW
+          - group: stacks-pypi-creds-test
     jobs:
     - job: Build
       pool:
