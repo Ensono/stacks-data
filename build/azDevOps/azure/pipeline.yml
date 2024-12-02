@@ -55,7 +55,7 @@ stages:
             inputs:
               targetType: inline
               script: taskctl test
-          
+
           - task: PublishTestResults@2
             displayName: "Publish Test Results"
             inputs:
