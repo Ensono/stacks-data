@@ -10,7 +10,7 @@ tasks:
     description: Ensure that the poetry is configured correctly
     command:
       - |
-        sed -i -e 's/.*version.*/version=\"${DOCKER_IMAGE_TAG}\"/g' pyproject.toml
+        sed -i -e 's/1.0.0/${DOCKER_IMAGE_TAG}/g' pyproject.toml
         poetry config virtualenvs.create true --local
         poetry config virtualenvs.in-project true --local
         poetry config installer.max-workers 10
@@ -37,6 +37,18 @@ tasks:
     description: Build package
     command:
       - git config --global --add safe.directory /app && poetry build
+
+  poetry:publish:
+    context: powershell
+    description: Publish package
+    command:
+      - |
+        # Add test PyPI to your poetry config repositories with the name test-pypi
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        # Add an API token for test PyPi
+        poetry config pypi-token.test-pypi <your-token>
+        # You can now publish to test-pypi using the following
+        poetry publish -r test-pypi
 
   publish:github:
     context: powershell
