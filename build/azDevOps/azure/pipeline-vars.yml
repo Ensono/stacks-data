@@ -44,3 +44,13 @@ variables:
 
   - name: pythonVersion
     value: "3.10"
+  
+  - name: COMMIT_ID
+    value: $(Build.SourceVersion)
+  - name: OWNER
+    value: ensono
+  - name: REPOSITORY
+    value: stacks-data
+  - name: ARTIFACTS_DIR
+    value: dlist/
+  - group: release-github-credentials
