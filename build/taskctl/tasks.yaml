@@ -1,0 +1,75 @@
+tasks:
+  buildnumber:
+    context: powershell
+    description: Update the build number
+    command:
+      - Update-BuildNumber
+
+  poetry:setup:
+    context: powershell
+    description: Ensure that the poetry is configured correctly
+    command:
+      - |
+        sed -i -e 's/1.0.0/${DOCKER_IMAGE_TAG}/g' pyproject.toml
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+        poetry config installer.max-workers 10
+        python3 -m poetry install --no-interaction
+
+  poetry:lint:
+    context: powershell
+    description: Perform Pre-Commit linting
+    command:
+      - git config --global --add safe.directory /app && python3 -m poetry run pre-commit run --all-files
+
+  poetry:test:
+    context: powershell
+    description: Run Tests
+    command:
+      - |
+        #TODO: Remove the installation of java into docker image
+        apt-get update
+        apt-get install openjdk-8-jdk-headless -qq
+        python3 -m poetry run pytest --junitxml "unit.xml"
+
+  poetry:build:
+    context: powershell
+    description: Build package
+    command:
+      - git config --global --add safe.directory /app && poetry build
+
+  poetry:publish:
+    context: powershell
+    description: Publish package
+    command:
+      - |
+        poetry config repositories.pypi '${REPO_URL}/legacy/'
+        poetry config pypi-token.pypi '$TOKEN'
+        poetry publish -r pypi
+
+  publish:github:
+    context: powershell
+    description: Publish Release to GitHub
+    command:
+      - |
+        Set-PSDebug -Trace 1
+        Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
+
+  debug:env:
+    context: powershell
+    description: Debugging task to show the environment variables in the container
+    command:
+      - dir env:/
+
+  debug:location:
+    context: powershell
+    command:
+      - Write-Host "***** DEBUG *****" && get-childitem -filter "*opencover.xml" -recurse
+
+  debug:sleep:
+    context: powershell
+    command:
+      - echo "Sleeping for {{ .sleep }}"
+      - sleep {{ .sleep }}
+    variables:
+      sleep: 30

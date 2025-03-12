@@ -1,0 +1,18 @@
+# Import contexts and tasks for Taskctl
+import:
+  - ./build/taskctl/contexts.yaml
+  - ./build/taskctl/tasks.yaml
+
+pipelines:
+  setup:
+    - task: buildnumber
+    - task: poetry:setup
+  lint:
+    - task: poetry:lint
+  test:
+    - task: poetry:test
+  build:
+    - task: poetry:build
+  publish:
+    # - task: poetry:publish
+    - task: publish:github

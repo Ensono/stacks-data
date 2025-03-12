@@ -1,0 +1,80 @@
+name: "$(Build.SourceBranchName)-init"
+
+pr:
+  branches:
+    include:
+      - "main"
+
+trigger:
+  branches:
+    include:
+      - "main"
+
+variables:
+  - template: pipeline-vars.yml
+
+parameters:
+  - name: force_publish
+    displayName: Force publish to the python repository
+    type: boolean
+    default: false
+
+stages:
+  - stage: Build
+    variables:
+      - ${{ if eq(variables['is_main_branch'], 'true') }}:
+          - group: stacks-pypi-creds-prod
+      - ${{ else }}:
+          - group: stacks-pypi-creds-test
+    jobs:
+      - job: Build
+        pool:
+          vmImage: $(pool_vm_image)
+
+        steps:
+          - template: ../templates/setup.yml
+            parameters:
+              TaskctlVersion: ${{ variables.TaskctlVersion }}
+
+          - task: Bash@3
+            displayName: "TaskCTL: Setup"
+            inputs:
+              targetType: inline
+              script: taskctl setup
+            env:
+              DOCKER_IMAGE_TAG: $(version_number)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Lint"
+            inputs:
+              targetType: inline
+              script: taskctl lint
+
+          - task: Bash@3
+            displayName: "TaskCTL: Test"
+            inputs:
+              targetType: inline
+              script: taskctl test
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Results"
+            inputs:
+              testResultsFiles: "*.xml"
+            condition: succeededOrFailed()
+
+          - task: Bash@3
+            displayName: "TaskCTL: Build"
+            inputs:
+              targetType: inline
+              script: taskctl build
+
+          - task: Bash@3
+            displayName: "TaskCTL: Publish"
+            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl publish
+            env:
+              REPO_URL: $(repo)
+              TOKEN: $(token)
+              VERSION_NUMBER: $(version_number)
