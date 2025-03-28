@@ -2,24 +2,30 @@
 from datetime import date
 import logging
 import re
-
-import great_expectations as gx
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import StringType, StructField, StructType, DateType, BooleanType
 
 from stacks.data.pyspark.data_quality.config import DatasourceConfig, ValidationConfig
 from stacks.data.pyspark.pyspark_utils import save_dataframe_as_delta
+
+try:
+    import great_expectations as gx
+    from great_expectations.core.batch import RuntimeBatchRequest
+    from great_expectations.core.expectation_configuration import ExpectationConfiguration
+    from great_expectations.core.expectation_suite import ExpectationSuite
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        FilesystemStoreBackendDefaults,
+    )
+except ImportError:
+    raise ImportError(
+        "Required dependencies for Stacks Data Quality are not installed. "
+        "Please install them using: pip install stacks-data[data-quality]"
+    )
 
 logger = logging.getLogger(__name__)
 

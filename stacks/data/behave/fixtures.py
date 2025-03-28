@@ -6,8 +6,7 @@ workloads.
 import logging
 from os import listdir
 from os.path import isfile, join
-from behave import fixture
-from behave.runner import Context
+
 from stacks.data.constants import (
     ADLS_ACCOUNT,
     CONFIG_BLOB_ACCOUNT,
@@ -16,6 +15,15 @@ from stacks.data.constants import (
 )
 from stacks.data.azure.adls import AdlsClient
 from stacks.data.azure.blob import BlobStorageClient
+
+try:
+    from behave import fixture
+    from behave.runner import Context
+except ImportError:
+    raise ImportError(
+        "Required dependencies for Stacks Data Behave testing are not installed. "
+        "Please install them using: pip install stacks-data[behave]"
+    )
 
 logger = logging.getLogger(__name__)
 
