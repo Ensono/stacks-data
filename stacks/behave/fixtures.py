@@ -14,8 +14,8 @@ from stacks.constants import (
     CONFIG_CONTAINER_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.platforms.azure.adls import AdlsClient
-from stacks.platforms.azure.blob import BlobStorageClient
+from stacks.azure.datalake import AdlsClient
+from stacks.azure.blob import BlobStorageClient
 
 logger = logging.getLogger(__name__)
 

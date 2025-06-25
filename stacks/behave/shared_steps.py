@@ -20,12 +20,12 @@ from stacks.constants import (
     AZURE_RESOURCE_GROUP_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.platforms.azure.data_factory import (
+from stacks.azure.data_factory import (
     check_adf_pipeline_in_complete_state,
     get_adf_pipeline_run,
     create_adf_pipeline_run,
 )
-from stacks.platforms.azure.adls import AdlsClient
+from stacks.azure.datalake import AdlsClient
 
 credential = DefaultAzureCredential()
 adf_client = DataFactoryManagementClient(credential, AZURE_SUBSCRIPTION_ID)
