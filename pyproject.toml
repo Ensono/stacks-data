@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
-version = "1.0.0"
+version = "2.0.0"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Ensono Stacks <stacks@ensono.com>"
@@ -45,7 +45,7 @@ pytest-mock = "^3.14.0"
 coverage = "^7.6.1"
 
 [tool.poetry.scripts]
-datastacks = "stacks.data.cli.datastacks_cli:cli"
+datastacks = "stacks.cli.datastacks_cli:cli"
 
 [tool.pytest.ini_options]
 log_cli = true

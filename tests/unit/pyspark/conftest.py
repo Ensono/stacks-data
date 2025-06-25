@@ -2,7 +2,7 @@ import uuid
 
 from pytest import fixture
 
-from stacks.data.pyspark.pyspark_utils import get_spark_session
+from stacks.pyspark.pyspark_utils import get_spark_session
 
 TEST_DATA_DIR = "tests/data/"
 TEST_CSV_DIR = TEST_DATA_DIR + "movies_dataset"
