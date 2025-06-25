@@ -132,10 +132,10 @@ def save_files_as_delta_tables(
     """
     logger.info("Saving input files as delta tables...")
     for file in input_files:
-        filepath = adls_client.get_file_url(source_container, file)
+        filepath = adls_client.get_file_url(file_system=source_container, file_name=file)
         df = read_datasource(spark, filepath, datasource_type, spark_read_options)
         filename_with_no_extension = Path(filepath).stem
-        output_filepath = adls_client.get_file_url(target_container, filename_with_no_extension)
+        output_filepath = adls_client.get_file_url(file_system=target_container, file_name=filename_with_no_extension)
         save_dataframe_as_delta(spark, df, output_filepath)
 
 
@@ -173,7 +173,7 @@ def read_latest_rundate_data(
     most_recent_rundate = max(rundates, key=isoparse)
     logger.info(f"Latest rundate: {most_recent_rundate}")
     latest_path = Path(datasource_path) / (dirname_prefix + most_recent_rundate)
-    dataset_url = adls_client.get_file_url(container_name, str(latest_path))
+    dataset_url = adls_client.get_file_url(file_system=container_name, file_name=str(latest_path))
     return read_datasource(spark, dataset_url, datasource_type, spark_read_options).drop(*metadata_columns)
 
 
@@ -201,5 +201,5 @@ def transform_and_save_as_delta(
 
     """
     transformed_df = transform_func(input_df)
-    output_filepath = adls_client.get_file_url(target_container, output_file_name)
+    output_filepath = adls_client.get_file_url(file_system=target_container, file_name=output_file_name)
     save_dataframe_as_delta(spark, transformed_df, output_filepath, overwrite, merge_keys)
