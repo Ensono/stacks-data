@@ -13,7 +13,7 @@ from typing import Any, Callable, Optional
 from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
-from stacks.azure.adls import AdlsClient
+from stacks.azure.datalake import AdlsClient
 from stacks.azure.blob import BlobStorageClient
 from stacks.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
 
