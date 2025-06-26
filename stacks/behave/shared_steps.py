@@ -25,7 +25,7 @@ from stacks.azure.data_factory import (
     get_adf_pipeline_run,
     create_adf_pipeline_run,
 )
-from stacks.azure.datalake import AdlsClient
+from stacks.azure.datalake.adls import AdlsClient
 
 credential = DefaultAzureCredential()
 adf_client = DataFactoryManagementClient(credential, AZURE_SUBSCRIPTION_ID)
