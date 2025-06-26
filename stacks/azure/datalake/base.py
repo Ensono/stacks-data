@@ -1,11 +1,12 @@
 """Azure utilities for ADLS and Lakehouse.
 
-This module provides a base client for Azure Data Lake Storage (ADLS) and Microsoft Fabric Lakehouse,
-along with subclasses for each.
+This module provides a base client for Azure Data Lake Storage (ADLS) and Microsoft Fabric Lakehouse.
 """
 import logging
 import os
 from typing import Optional
+
+from azure.core.credentials import TokenCredential
 from azure.identity import DefaultAzureCredential
 from azure.storage.filedatalake import DataLakeDirectoryClient, DataLakeServiceClient, FileSystemClient
 
@@ -13,15 +14,16 @@ logger = logging.getLogger(__name__)
 
 
 class DatalakeClient:
-    def __init__(self, storage_account_name: str):
+    def __init__(self, storage_account_name: str, credential: Optional[TokenCredential] = None):
         """Instantiate a new ADLS Client.
 
         Args:
             storage_account_name: Name of the storage account.
+            credential: The credentials to authenticate with, e.g. ManagedIdentityCredential or DefaultAzureCredential.
         """
         self.storage_account_name = storage_account_name
         self.account_url = self.get_account_url()
-        self.credential = DefaultAzureCredential()
+        self.credential = credential or DefaultAzureCredential()
         self.datalake_client = DataLakeServiceClient(account_url=self.account_url, credential=self.credential)
 
     def get_account_url(self) -> str:
@@ -163,56 +165,3 @@ class DatalakeClient:
 
         with open(file=os.path.join(local_path, file_name), mode="rb") as data:
             file_client.upload_data(data, overwrite=True)
-
-
-class AdlsClient(DatalakeClient):
-    def __init__(self, storage_account_name: str):
-        """Instantiate a new ADLS Client.
-
-        Args:
-            storage_account_name: Name of the storage account
-        """
-        super().__init__(storage_account_name)
-
-    def get_account_url(self) -> str:
-        """Returns the account URL for the Azure Data Lake Storage (ADLS) service."""
-        return f"https://{self.storage_account_name}.dfs.core.windows.net"
-
-    def get_file_url(self, file_system: str, file_name: str) -> str:
-        """Returns an Azure Data Lake Storage (ADLS) URL for a specific file.
-
-        Args:
-            file_system: Container name.
-            file_name: The name of the file (including any subdirectories within the container).
-
-        Returns:
-            Full ADLS URL for the specified file.
-        """
-        return f"abfss://{file_system}@{self.storage_account_name}.dfs.core.windows.net/{file_name}"
-
-
-class LakehouseClient(DatalakeClient):
-    def __init__(self, storage_account_name: str = "onelake"):
-        """Instantiate a new Lakehouse Client.
-
-        Args:
-            storage_account_name: Name of the storage account
-        """
-        super().__init__(storage_account_name)
-
-    def get_account_url(self) -> str:
-        """Returns the account URL for the Microsoft Fabric Lakehouse service."""
-        return f"https://{self.storage_account_name}.dfs.fabric.microsoft.com"
-
-    def get_file_url(self, file_system: str, lakehouse_id: str, file_name: str) -> str:
-        """Returns a Lakehouse URL for a specific file.
-
-        Args:
-            file_system: Workspace ID.
-            lakehouse_id: Lakehouse ID.
-            file_name: The name of the file (including any subdirectories within the lakehouse).
-
-        Returns:
-            Full Lakehouse URL for the specified file.
-        """
-        return f"abfss://{file_system}@{self.storage_account_name}.dfs.fabric.microsoft.com/{lakehouse_id}/{file_name}"
