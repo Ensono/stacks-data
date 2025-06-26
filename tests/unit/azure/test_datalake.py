@@ -93,7 +93,7 @@ def test_get_file_url_adls(mock_adls_client):
     file_name = "myfolder/myfile.txt"
     expected_url = "abfss://mycontainer@teststorageaccount.dfs.core.windows.net/myfolder/myfile.txt"
 
-    assert mock_adls_client.get_file_url(file_system=container, file_name=file_name) == expected_url
+    assert mock_adls_client.get_file_url(container, file_name) == expected_url
 
 
 @pytest.mark.parametrize("lakehouse_client", [LakehouseClient("onelake"), LakehouseClient()])
@@ -103,10 +103,7 @@ def test_get_file_url_lakehouse(lakehouse_client):
     table_path = "Tables/dbo/my_table"
 
     expected_url = f"abfss://{workspace_id}@onelake.dfs.fabric.microsoft.com/{lakehouse_id}/{table_path}"
-    assert (
-        lakehouse_client.get_file_url(file_system=workspace_id, lakehouse_id=lakehouse_id, file_name=table_path)
-        == expected_url
-    )
+    assert lakehouse_client.get_file_url(workspace_id, lakehouse_id, table_path) == expected_url
 
 
 def test_get_account_url_adls(mock_adls_client):

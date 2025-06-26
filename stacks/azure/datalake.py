@@ -28,9 +28,9 @@ class DatalakeClient:
         """Returns the account URL for the data lake service."""
         raise NotImplementedError("Subclasses must implement get_account_url")
 
-    def get_file_url(self, **kwargs) -> str:
+    def get_file_url(self, *args) -> str:
         """Returns a fully qualified URL for a specific file in Azure Data Lake Storage (ADLS) or Lakehouse."""
-        raise NotImplementedError("Subclasses must implement get_account_url")
+        raise NotImplementedError("Subclasses must implement get_file_url")
 
     def get_file_system_client(self, file_system: str) -> FileSystemClient:
         """Returns a filesystem client based on the given file system name.
@@ -178,7 +178,7 @@ class AdlsClient(DatalakeClient):
         """Returns the account URL for the Azure Data Lake Storage (ADLS) service."""
         return f"https://{self.storage_account_name}.dfs.core.windows.net"
 
-    def get_file_url(self, *, file_system: str, file_name: str) -> str:
+    def get_file_url(self, file_system: str, file_name: str) -> str:
         """Returns an Azure Data Lake Storage (ADLS) URL for a specific file.
 
         Args:
@@ -204,7 +204,7 @@ class LakehouseClient(DatalakeClient):
         """Returns the account URL for the Microsoft Fabric Lakehouse service."""
         return f"https://{self.storage_account_name}.dfs.fabric.microsoft.com"
 
-    def get_file_url(self, *, file_system: str, lakehouse_id: str, file_name: str) -> str:
+    def get_file_url(self, file_system: str, lakehouse_id: str, file_name: str) -> str:
         """Returns a Lakehouse URL for a specific file.
 
         Args:
