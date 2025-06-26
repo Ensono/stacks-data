@@ -1,7 +1,7 @@
 from pytest import fixture
 
-from stacks.pyspark.data_quality.config import Config
-from stacks.pyspark.data_quality.utils import create_datasource_context
+from stacks_data.pyspark.data_quality.config import Config
+from stacks_data.pyspark.data_quality.utils import create_datasource_context
 
 
 @fixture

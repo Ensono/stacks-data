@@ -1,7 +1,7 @@
 import pytest
 from pyspark.sql import Row
 
-from stacks.pyspark.pyspark_utils import (
+from stacks_data.pyspark.pyspark_utils import (
     delta_table_exists,
     ensure_database_exists,
     read_datasource,

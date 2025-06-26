@@ -3,7 +3,7 @@ import yaml
 
 from click.testing import CliRunner
 from pydantic import ValidationError
-from stacks.cli.datastacks_cli import ingest, processing
+from stacks_data.cli.datastacks_cli import ingest, processing
 
 
 TEST_CONFIG_DIRECTORY = "tests/data/template_config/"
