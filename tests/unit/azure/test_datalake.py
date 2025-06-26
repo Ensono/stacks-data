@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import Mock, patch
 from azure.storage.filedatalake import FileSystemClient, PathProperties
-from stacks.azure.datalake import AdlsClient, LakehouseClient
+from stacks.azure.datalake.adls import AdlsClient
+from stacks.azure.datalake.lakehouse import LakehouseClient
 from pathlib import Path
 
 TEST_CSV_DIR = "tests/data/movies_dataset"
@@ -9,7 +10,7 @@ TEST_CSV_DIR = "tests/data/movies_dataset"
 
 @pytest.fixture
 def mock_adls_client():
-    with patch("stacks.azure.datalake.DataLakeServiceClient", autospec=True) as mock_service_client:
+    with patch("stacks.azure.datalake.base.DataLakeServiceClient", autospec=True) as mock_service_client:
 
         def get_paths_side_effect(path, recursive=True):
             test_path = Path(TEST_CSV_DIR)
