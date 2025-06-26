@@ -33,12 +33,12 @@ def mock_adls_client():
         yield mock_client
 
 
-def test_filter_directory_paths_adls(mock_adls_client):
+def test_filter_directory_paths(mock_adls_client):
     result = mock_adls_client.filter_directory_paths("container_name", "directory_path", "sub")
     assert result == ["subfolder"]
 
 
-def test_delete_directory_adls(mock_adls_client):
+def test_delete_directory(mock_adls_client):
     adls_directory_client_mock = mock_adls_client.datalake_client.get_directory_client.return_value
     adls_directory_client_mock.exists.return_value = True
 
@@ -50,13 +50,13 @@ def test_delete_directory_adls(mock_adls_client):
 
 
 @pytest.mark.parametrize("files", [["links.csv"], ["keywords.csv", "links.csv", "movies_metadata.csv", "ratings.csv"]])
-def test_all_files_present_in_adls(mock_adls_client, files):
+def test_all_files_present(mock_adls_client, files):
     result = mock_adls_client.all_files_present("container_name", "directory_name", files)
     assert result is True
 
 
 @pytest.mark.parametrize("files", [["missing.csv"], ["links.csv", "missing.csv"]])
-def test_all_files_present_in_adls_error(mock_adls_client, files):
+def test_all_files_present_error(mock_adls_client, files):
     with pytest.raises(AssertionError):
         mock_adls_client.all_files_present("container_name", "directory_name", files)
 
