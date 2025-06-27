@@ -35,9 +35,14 @@ tasks:
     context: powershell
     description: Bump version based on Conventional Commits using Commitizen and push to origin
     command:
+      - python3 -m poetry run cz bump --yes
+
+  cz:push-bump:
+    context: powershell
+    description: Push version bump to GitHub
+    command:
       - git config user.email "stacks@ensono.com"
       - git config user.name "Ensono Stacks"
-      - python3 -m poetry run cz bump --yes
       - git push origin HEAD
 
   poetry:build:
