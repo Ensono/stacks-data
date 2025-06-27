@@ -43,10 +43,13 @@ stages:
               targetType: inline
               script: taskctl bump_version
 
-          - script: |
-              VERSION=$(poetry version -s)
-              echo "##vso[task.setvariable variable=version_number]$VERSION"
-            displayName: "Set VERSION_NUMBER from pyproject.toml"
+          - powershell: |
+              $VERSION = poetry version -s
+              $BUILD_ID = $env:BUILD_BUILDID
+              $BUILD_NUMBER = "$VERSION-$BUILD_ID"
+              Write-Host "##vso[task.setvariable variable=version_number]$VERSION"
+              Write-Host "##vso[task.setvariable variable=build_number]$BUILD_NUMBER"
+            displayName: "Set version_number and build_number"
 
           - script: |
               echo "Version number set to: $(version_number)"
@@ -58,7 +61,7 @@ stages:
               targetType: inline
               script: taskctl setup
             env:
-              DOCKER_IMAGE_TAG: $(version_number)
+              DOCKER_IMAGE_TAG: $(build_number)
 
           - task: Bash@3
             displayName: "TaskCTL: Lint"
