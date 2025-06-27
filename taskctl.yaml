@@ -4,9 +4,11 @@ import:
   - ./build/taskctl/tasks.yaml
 
 pipelines:
-  setup:
-    - task: buildnumber
+  poetry_setup:
     - task: poetry:setup
+  setup:
+    - task: set:build-metadata
+    - task: buildnumber
   lint:
     - task: poetry:lint
   test:

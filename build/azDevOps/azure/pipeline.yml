@@ -37,23 +37,17 @@ stages:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
           - task: Bash@3
+            displayName: "TaskCTL: Poetry Project Setup"
+            inputs:
+              targetType: inline
+              script: taskctl poetry_setup
+
+          - task: Bash@3
             displayName: "TaskCTL: Bump Version"
             condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl bump_version
-
-          - powershell: |
-              $VERSION = poetry version -s
-              $BUILD_ID = $env:BUILD_BUILDID
-              $BUILD_NUMBER = "$VERSION-$BUILD_ID"
-              Write-Host "##vso[task.setvariable variable=version_number]$VERSION"
-              Write-Host "##vso[task.setvariable variable=build_number]$BUILD_NUMBER"
-            displayName: "Set version_number and build_number"
-
-          - script: |
-              echo "Version number set to: $(version_number)"
-            displayName: "Debug: Show version_number"
 
           - task: Bash@3
             displayName: "TaskCTL: Setup"
@@ -62,6 +56,10 @@ stages:
               script: taskctl setup
             env:
               DOCKER_IMAGE_TAG: $(build_number)
+
+          - script: |
+              echo "Version number set to: $(version_number)"
+            displayName: "Debug: Show version_number"
 
           - task: Bash@3
             displayName: "TaskCTL: Lint"
