@@ -49,7 +49,7 @@ stages:
             displayName: "Set VERSION_NUMBER from pyproject.toml"
             condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
 
-          - script:
+          - script: |
               echo "Version number set to: $(version_number)"
             displayName: "Debug: Show version_number"
 
