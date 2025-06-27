@@ -14,8 +14,9 @@ packages = [
 [tool.commitizen]
 # Use the Conventional Commits standard to parse commits and decide how to bump versions.
 name = "cz_conventional_commits"
+version = "1.1.0"
 tag_format = "v$version"
-version_files = ["pyproject.toml"]
+version_files = ["pyproject.toml:tool.poetry.version"]
 
 [build-system]
 requires = ["poetry-core"]
