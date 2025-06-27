@@ -1,10 +1,4 @@
 tasks:
-  buildnumber:
-    context: powershell
-    description: Update the build number
-    command:
-      - Update-BuildNumber
-
   poetry:setup:
     context: powershell
     description: Ensure that the poetry is configured correctly
@@ -14,6 +8,23 @@ tasks:
         poetry config virtualenvs.in-project true --local
         poetry config installer.max-workers 10
         python3 -m poetry install --no-interaction --extras "behave cli data-quality"
+
+  set:build-metadata:
+    context: powershell
+    description: Extract and export version_number and build_number
+    command:
+      - |
+        $version = poetry version -s
+        $buildId = $env:BUILD_BUILDID
+        $buildNumber = "$version-$buildId"
+        Write-Host "##vso[task.setvariable variable=version_number]$version"
+        Write-Host "##vso[task.setvariable variable=build_number]$buildNumber"
+
+  buildnumber:
+    context: powershell
+    description: Update the build number
+    command:
+      - Update-BuildNumber
 
   poetry:lint:
     context: powershell
