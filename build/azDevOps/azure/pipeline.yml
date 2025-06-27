@@ -58,8 +58,9 @@ stages:
               DOCKER_IMAGE_TAG: $(build_number)
 
           - script: |
-              echo "Version number set to: $(version_number)"
-            displayName: "Debug: Show version_number"
+              echo "version_number: $(version_number)"
+              echo "build_number: $(build_number)"
+            displayName: "Debug: Show version and build numbers"
 
           - task: Bash@3
             displayName: "TaskCTL: Lint"
