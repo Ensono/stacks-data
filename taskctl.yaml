@@ -6,8 +6,9 @@ import:
 pipelines:
   poetry_setup:
     - task: poetry:setup
-  setup:
-    - task: set:build-metadata
+  set_env_vars:
+    - task: set:env_vars
+  build_number:
     - task: buildnumber
   lint:
     - task: poetry:lint

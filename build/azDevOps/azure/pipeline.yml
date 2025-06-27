@@ -50,10 +50,16 @@ stages:
               script: taskctl bump_version
 
           - task: Bash@3
-            displayName: "TaskCTL: Setup"
+            displayName: "TaskCTL: Set Environment Variables"
             inputs:
               targetType: inline
-              script: taskctl setup
+              script: taskctl set_env_vars
+
+          - task: Bash@3
+            displayName: "TaskCTL: Set Build Number"
+            inputs:
+              targetType: inline
+              script: taskctl buildnumber
             env:
               DOCKER_IMAGE_TAG: $(build_number)
 
