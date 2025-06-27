@@ -9,7 +9,7 @@ tasks:
         poetry config installer.max-workers 10
         python3 -m poetry install --no-interaction --extras "behave cli data-quality"
 
-  set:build-metadata:
+  set:env_vars:
     context: powershell
     description: Extract and export version_number and build_number
     command:
