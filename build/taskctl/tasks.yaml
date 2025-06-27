@@ -10,7 +10,6 @@ tasks:
     description: Ensure that the poetry is configured correctly
     command:
       - |
-        sed -i -e 's/1.0.0/${DOCKER_IMAGE_TAG}/g' pyproject.toml
         poetry config virtualenvs.create true --local
         poetry config virtualenvs.in-project true --local
         poetry config installer.max-workers 10
@@ -32,6 +31,15 @@ tasks:
         apt-get install openjdk-17-jdk-headless -qq
         python3 -m poetry run pytest --junitxml "unit.xml"
 
+  cz:bump:
+  context: powershell
+  description: Bump version based on Conventional Commits using Commitizen and push to origin
+  command:
+    - git config user.email "stacks@ensono.com"
+    - git config user.name "Ensono Stacks"
+    - python3 -m poetry run cz bump --yes
+    - git push origin HEAD
+
   poetry:build:
     context: powershell
     description: Build package
@@ -51,9 +59,7 @@ tasks:
     context: powershell
     description: Publish Release to GitHub
     command:
-      - |
-        Set-PSDebug -Trace 1
-        Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
+      - Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
 
   debug:env:
     context: powershell

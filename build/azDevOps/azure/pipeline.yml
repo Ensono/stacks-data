@@ -69,6 +69,19 @@ stages:
               script: taskctl build
 
           - task: Bash@3
+            displayName: "TaskCTL: Bump Version"
+            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl bump_version
+
+          - script: |
+              VERSION=$(poetry version -s)
+              echo "##vso[task.setvariable variable=version_number]$VERSION"
+            displayName: "Set VERSION_NUMBER from pyproject.toml"
+            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+
+          - task: Bash@3
             displayName: "TaskCTL: Publish"
             condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
