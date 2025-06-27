@@ -13,6 +13,8 @@ pipelines:
     - task: poetry:test
   bump_version:
     - task: cz:bump
+  push_bump:
+    - task: cz:push-bump
   build:
     - task: poetry:build
   publish:
