@@ -4,14 +4,20 @@ This module provides command-line interfaces to generate and manage data workloa
 """
 import logging
 
-import click
-from click_loglevel import LogLevel
-
 from stacks.data.constants import CONFIG_CONTAINER_NAME
 from stacks.data.pyspark.data_quality.main import data_quality_main
 from stacks.data.logger import setup_logger
 from stacks.data.generate.data_workloads import validate_yaml_config, generate_pipeline
 from stacks.data.generate.template_config import IngestWorkloadConfigModel, ProcessingWorkloadConfigModel
+
+try:
+    import click
+    from click_loglevel import LogLevel
+except ImportError:
+    raise ImportError(
+        "Required dependencies for Datastacks CLI are not installed. "
+        "Please install them using: pip install stacks-data[cli]"
+    )
 
 
 @click.group()
