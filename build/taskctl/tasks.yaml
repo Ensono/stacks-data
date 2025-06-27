@@ -32,13 +32,14 @@ tasks:
         python3 -m poetry run pytest --junitxml "unit.xml"
 
   cz:bump:
-  context: powershell
-  description: Bump version based on Conventional Commits using Commitizen and push to origin
-  command:
-    - git config user.email "stacks@ensono.com"
-    - git config user.name "Ensono Stacks"
-    - python3 -m poetry run cz bump --yes
-    - git push origin HEAD
+    context: powershell
+    description: Bump version based on Conventional Commits using Commitizen and push to origin
+    command:
+      - |
+        git config user.email "stacks@ensono.com"
+        git config user.name "Ensono Stacks"
+        python3 -m poetry run cz bump --yes
+        git push origin HEAD
 
   poetry:build:
     context: powershell
