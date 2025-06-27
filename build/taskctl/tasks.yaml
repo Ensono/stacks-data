@@ -14,7 +14,7 @@ tasks:
         poetry config virtualenvs.create true --local
         poetry config virtualenvs.in-project true --local
         poetry config installer.max-workers 10
-        python3 -m poetry install --no-interaction
+        python3 -m poetry install --no-interaction --extras "behave cli data-quality"
 
   poetry:lint:
     context: powershell
