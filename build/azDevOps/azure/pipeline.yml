@@ -47,7 +47,6 @@ stages:
               VERSION=$(poetry version -s)
               echo "##vso[task.setvariable variable=version_number]$VERSION"
             displayName: "Set VERSION_NUMBER from pyproject.toml"
-            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
 
           - script: |
               echo "Version number set to: $(version_number)"
