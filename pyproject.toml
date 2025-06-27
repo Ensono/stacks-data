@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
-version = "1.0.0"
+version = "1.1.0"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Ensono Stacks <stacks@ensono.com>"
@@ -17,21 +17,31 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-click = "^8.1.7"
-pyspark = "^3.4.3"
-jsonschema = "^4.23.0"
+
+# Core dependencies
 azure-identity = "^1.17.1"
 azure-mgmt-datafactory = "^3.1.0"
 azure-storage-file-datalake = "^12.16.0"
-click-loglevel = "^0.4.0.post1"
-colorlog = "^6.8.2"
-polling2 = "^0.5.0"
-jinja2 = "^3.1.4"
-pyyaml = "^6.0.2"
-great-expectations = "^0.17.23"
-pydantic = "^1.10.18"
+pyspark = "^3.4.3"
 delta-spark = "^2.4.0"
-behave = "^1.2.6"
+pydantic = "^1.10.18"
+jsonschema = "^4.23.0"
+colorlog = "^6.8.2"
+pyyaml = "^6.0.2"
+
+# Optional dependencies
+behave = { version = "^1.2.6", optional = true }
+polling2 = { version = "^0.5.0", optional = true }
+click = { version = "^8.1.7", optional = true }
+click-loglevel = { version = "^0.4.0.post1", optional = true }
+jinja2 = { version = "^3.1.4", optional = true }
+great-expectations = { version = "^0.17.23", optional = true }
+
+[tool.poetry.extras]
+# Additional dependency groups
+behave = ["behave", "polling2"]
+cli = ["click", "click-loglevel", "jinja2"]
+data-quality = ["great-expectations"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
