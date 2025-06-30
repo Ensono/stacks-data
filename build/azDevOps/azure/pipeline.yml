@@ -48,6 +48,8 @@ stages:
             inputs:
               targetType: inline
               script: taskctl bump_version
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Set Environment Variables"
