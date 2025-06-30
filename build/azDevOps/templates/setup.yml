@@ -5,6 +5,13 @@ steps:
   # Checkout self repo
   - checkout: self
     fetchDepth: 0
+    persistCredentials: true
+
+  - script: |
+      echo "Switching to source branch: $(System.PullRequest.SourceBranch)"
+      git checkout $(System.PullRequest.SourceBranch)
+      git log -1
+    displayName: "Checkout PR source branch"
 
   # Install Taskfile so that the tests can be run
   - task: Bash@3
