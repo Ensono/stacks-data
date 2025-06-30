@@ -21,10 +21,3 @@ steps:
       script: |
         sudo wget https://github.com/Ensono/taskctl/releases/download/v${{ parameters.TaskctlVersion }}/taskctl_${{ parameters.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
         sudo tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl
-
-  - script: |
-      echo "Current directory: $(Build.SourcesDirectory)"
-      echo "Repo contents:"
-      ls -a
-      cat .git/config || echo ".git not found"
-    displayName: "Debug: Check Git visibility"

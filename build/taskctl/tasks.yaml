@@ -37,7 +37,7 @@ tasks:
     description: Run Tests
     command:
       - |
-        #TODO: Remove the installation of java into docker image
+        #TODO: Move the installation of java into docker image
         apt-get update
         apt-get install openjdk-17-jdk-headless -qq
         python3 -m poetry run pytest --junitxml "unit.xml"
