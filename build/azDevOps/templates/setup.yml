@@ -13,6 +13,18 @@ steps:
       git log -1
     displayName: "Checkout PR source branch"
 
+  - script: |
+      echo "Checking last commit message..."
+      COMMIT_MSG=$(git log -1 --pretty=%B)
+      echo "Last commit: $COMMIT_MSG"
+
+      if [[ "$COMMIT_MSG" =~ ^bump:\ version ]]; then
+        echo "Auto version bump detected, skipping pipeline."
+        exit 0
+      fi
+    displayName: "Skip pipeline on auto version bump"
+    condition: succeeded()
+
   # Install Taskfile so that the tests can be run
   - task: Bash@3
     displayName: "Install: Taskctl"
