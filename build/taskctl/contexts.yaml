@@ -8,8 +8,6 @@ contexts:
         - -v
         - ${SOURCEDIR}:/app
         - -v
-        - ${SOURCEDIR}/.git:/app/.git
-        - -v
         - /var/run/docker.sock:/var/run/docker.sock
         - -e
         - PSModulePath=/modules
