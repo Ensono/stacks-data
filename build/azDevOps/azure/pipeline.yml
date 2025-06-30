@@ -122,7 +122,7 @@ stages:
 
           - task: Bash@3
             displayName: "TaskCTL: Push Version Bump Commit"
-            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl push_bump
