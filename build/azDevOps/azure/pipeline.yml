@@ -44,6 +44,12 @@ stages:
             env:
               SOURCEDIR: $(Build.SourcesDirectory)
 
+          - script: |
+              echo "SOURCEDIR: $(Build.SourcesDirectory)"
+              ls -la $(Build.SourcesDirectory)
+              ls -la $(Build.SourcesDirectory)/.git
+            displayName: "Debug: Verify .git exists before mount"
+
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
