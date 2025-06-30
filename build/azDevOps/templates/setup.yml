@@ -20,5 +20,4 @@ steps:
       echo "Repo contents:"
       ls -a
       cat .git/config || echo ".git not found"
-    workingDirectory: $(PWD)
     displayName: "Debug: Check Git visibility"
