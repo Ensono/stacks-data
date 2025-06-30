@@ -6,9 +6,9 @@ contexts:
         - run
         - --rm
         - -v
-        - ${PWD}:/app
+        - $(Build.SourcesDirectory):/app
         - -v
-        - ${PWD}/.git:/app/.git
+        - $(Build.SourcesDirectory)/.git:/app/.git
         - -v
         - /var/run/docker.sock:/var/run/docker.sock
         - -e
