@@ -47,7 +47,7 @@ tasks:
     description: Bump version based on Conventional Commits using Commitizen and push to origin
     command:
       - 'echo "Inside container: checking .git"'
-      - 'git config --global --add safe.directory /app'
+      - 'git config --add safe.directory /app'
       - ls -la /app
       - ls -la /app/.git
       - git rev-parse --is-inside-work-tree
