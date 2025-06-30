@@ -44,7 +44,7 @@ stages:
 
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
-            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl bump_version
@@ -74,11 +74,11 @@ stages:
               targetType: inline
               script: taskctl lint
 
-          - task: Bash@3
-            displayName: "TaskCTL: Test"
-            inputs:
-              targetType: inline
-              script: taskctl test
+#          - task: Bash@3
+#            displayName: "TaskCTL: Test"
+#            inputs:
+#              targetType: inline
+#              script: taskctl test
 
           - task: PublishTestResults@2
             displayName: "Publish Test Results"

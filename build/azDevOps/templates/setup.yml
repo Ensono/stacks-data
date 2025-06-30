@@ -4,6 +4,7 @@ parameters:
 steps:
   # Checkout self repo
   - checkout: self
+    fetchDepth: 0
 
   # Install Taskfile so that the tests can be run
   - task: Bash@3
