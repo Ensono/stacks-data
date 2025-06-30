@@ -41,6 +41,8 @@ stages:
             inputs:
               targetType: inline
               script: taskctl poetry_setup
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
