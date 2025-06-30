@@ -62,6 +62,7 @@ tasks:
     description: Push version bump to GitHub
     command:
       - |
+        git config --global --add safe.directory /app
         echo "Current branch:"
         git branch
         echo "Most recent commit:"
