@@ -37,20 +37,6 @@ stages:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
           - task: Bash@3
-            displayName: "TaskCTL: Poetry Project Setup"
-            inputs:
-              targetType: inline
-              script: taskctl poetry_setup
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
-
-          - script: |
-              echo "SOURCEDIR: $(Build.SourcesDirectory)"
-              ls -la $(Build.SourcesDirectory)
-              ls -la $(Build.SourcesDirectory)/.git
-            displayName: "Debug: Verify .git exists before mount"
-
-          - task: Bash@3
             displayName: "Debug: Git on Agent"
             inputs:
               targetType: inline
@@ -66,6 +52,20 @@ stages:
 
                 echo "Most recent commit:"
                 git log -1
+
+          - task: Bash@3
+            displayName: "TaskCTL: Poetry Project Setup"
+            inputs:
+              targetType: inline
+              script: taskctl poetry_setup
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - script: |
+              echo "SOURCEDIR: $(Build.SourcesDirectory)"
+              ls -la $(Build.SourcesDirectory)
+              ls -la $(Build.SourcesDirectory)/.git
+            displayName: "Debug: Verify .git exists before mount"
 
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
