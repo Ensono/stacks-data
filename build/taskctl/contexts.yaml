@@ -7,7 +7,7 @@ contexts:
         - --rm
         - -v
         - ${PWD}:/app
-        - v
+        - -v
         - ${PWD}/.git:/app/.git
         - -v
         - /var/run/docker.sock:/var/run/docker.sock
