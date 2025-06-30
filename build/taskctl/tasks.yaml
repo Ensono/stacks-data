@@ -48,6 +48,12 @@ tasks:
     command:
       - |
         git config --global --add safe.directory /app
+        git config user.email "stacks@ensono.com"
+        git config user.name "Ensono Stacks"
+        echo "Current branch:"
+        git branch
+        echo "Most recent commit:"
+        git log -1
         git rev-parse --is-inside-work-tree
         python3 -m poetry run cz bump --yes
 
