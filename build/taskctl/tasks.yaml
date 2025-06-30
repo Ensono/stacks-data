@@ -47,9 +47,7 @@ tasks:
     description: Bump version based on Conventional Commits using Commitizen and push to origin
     command:
       - 'echo "SOURCEDIR mounted at /app"'
-      - 'ls -la /app'
-      - 'file /app/.git || echo ".git is missing"'
-      - 'cat /app/.git || echo ".git is not a file"'
+      - 'git config --global --add safe.directory /app'
       - 'git rev-parse --is-inside-work-tree'
       - 'python3 -m poetry run cz bump --yes'
 
