@@ -61,9 +61,12 @@ tasks:
     context: powershell
     description: Push version bump to GitHub
     command:
-      - git config user.email "stacks@ensono.com"
-      - git config user.name "Ensono Stacks"
-      - git push origin HEAD
+      - |
+        echo "Current branch:"
+        git branch
+        echo "Most recent commit:"
+        git log -1
+        git push origin HEAD
 
   poetry:build:
     context: powershell
