@@ -46,11 +46,10 @@ tasks:
     context: powershell
     description: Bump version based on Conventional Commits using Commitizen and push to origin
     command:
-      - git config --global --add safe.directory /app && git rev-parse --is-inside-work-tree
-#      - 'echo "SOURCEDIR mounted at /app"'
-#      - 'git config --global --add safe.directory /app'
-#      - 'git rev-parse --is-inside-work-tree'
-#      - 'python3 -m poetry run cz bump --yes'
+      - |
+        git config --global --add safe.directory /app
+        git rev-parse --is-inside-work-tree
+        python3 -m poetry run cz bump --yes
 
   cz:push-bump:
     context: powershell
