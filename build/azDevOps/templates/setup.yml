@@ -16,7 +16,7 @@ steps:
         sudo tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl
 
   - script: |
-      echo "Current directory: $(PWD)"
+      echo "Current directory: $(Build.SourcesDirectory)"
       echo "Repo contents:"
       ls -a
       cat .git/config || echo ".git not found"
