@@ -14,6 +14,8 @@ pipelines:
     - task: poetry:lint
   test:
     - task: poetry:test
+  check_next_version:
+    - task: cz:check_next_version
   bump_version:
     - task: cz:bump
   push_bump:
