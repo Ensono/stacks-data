@@ -73,7 +73,7 @@ stages:
             inputs:
               targetType: inline
               script: taskctl poetry_setup
-            env:
+#            env:
 #              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
