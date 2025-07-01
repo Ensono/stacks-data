@@ -61,20 +61,12 @@ stages:
           - group: stacks-pypi-creds-prod
       - ${{ else }}:
           - group: stacks-pypi-creds-test
-      - varFromCheck: $[ stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'] ]
     jobs:
       - job: Build
         pool:
           vmImage: $(pool_vm_image)
 
         steps:
-          - task: Bash@3
-            displayName: "Debug: Print Var"
-            inputs:
-              targetType: inline
-              script: |
-                echo $(varFromCheck)
-
           - template: ../templates/setup.yml
             parameters:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
