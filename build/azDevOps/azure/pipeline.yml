@@ -70,6 +70,11 @@ stages:
           vmImage: $(pool_vm_image)
 
         steps:
+          - script: |
+              echo "CheckBump.Check.outputs['DetectBump.skipPipeline']: $[ stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'] ]"
+            displayName: "Debug output value"
+
+
           - template: ../templates/setup.yml
             parameters:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
