@@ -2,7 +2,6 @@ parameters:
   TaskctlVersion: 1.5.2
 
 steps:
-  # Checkout self repo
   - checkout: self
     fetchDepth: 0
     persistCredentials: true
