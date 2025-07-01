@@ -20,7 +20,44 @@ parameters:
     default: false
 
 stages:
+  - stage: CheckBump
+    displayName: "Check for Auto Version Bump"
+    jobs:
+      - job: Check
+        displayName: "Determine if pipeline should run"
+        pool:
+          vmImage: $(pool_vm_image)
+        outputs:
+          skip: $[ dependencies.Check.outputs['Check.skipPipeline'] ]
+        steps:
+          - checkout: self
+            fetchDepth: 0
+            persistCredentials: true
+
+          - script: |
+              echo "Switching to source branch: $(System.PullRequest.SourceBranch)"
+              git checkout $(System.PullRequest.SourceBranch)
+              git log -1
+            displayName: "Checkout source branch"
+
+          - script: |
+              echo "Checking last commit message..."
+              COMMIT_MSG=$(git log -1 --pretty=%B)
+              echo "Last commit: $COMMIT_MSG"
+
+              if [[ "$COMMIT_MSG" =~ ^bump:\ version ]]; then
+                echo "Auto version bump detected."
+                echo "##vso[task.setvariable variable=skipPipeline;isOutput=true]true"
+              else
+                echo "No auto version bump detected."
+                echo "##vso[task.setvariable variable=skipPipeline;isOutput=true]false"
+              fi
+            name: Check
+            displayName: "Detect version bump"
   - stage: Build
+    dependsOn: CheckBump
+    condition: ne(dependencies.CheckBump.outputs['Check.skipPipeline'], 'true')
+
     variables:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
           - group: stacks-pypi-creds-prod
