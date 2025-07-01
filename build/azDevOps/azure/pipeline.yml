@@ -24,7 +24,6 @@ stages:
     displayName: "Check for Auto Version Bump"
     jobs:
       - job: Check
-        name: Check
         displayName: "Determine if pipeline should run"
         pool:
           vmImage: $(pool_vm_image)
@@ -51,11 +50,11 @@ stages:
                 echo "No auto version bump detected."
                 echo "##vso[task.setvariable variable=skipPipeline;isOutput=true]false"
               fi
-            name: Check
+            name: DetectBump
             displayName: "Detect version bump"
   - stage: Build
     dependsOn: CheckBump
-    condition: ne(stageDependencies.CheckBump.Check.outputs['Check.skipPipeline'], 'true')
+    condition: ne(stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'], 'true')
 
     variables:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
