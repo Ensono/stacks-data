@@ -6,7 +6,7 @@ contexts:
         - run
         - --rm
         - -v
-        - ${SOURCEDIR}:/app
+        - ${PWD}:/app
         - -v
         - /var/run/docker.sock:/var/run/docker.sock
         - -e

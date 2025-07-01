@@ -33,6 +33,7 @@ stages:
           - template: ../templates/detect-bump.yml
             parameters:
               name: DetectBump
+
   - stage: Build
     dependsOn: CheckBump
     condition: eq(stageDependencies.CheckBump.outputs['Check.DetectBump.skipPipeline'], 'false')
