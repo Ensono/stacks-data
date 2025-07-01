@@ -20,8 +20,12 @@ parameters:
     default: false
 
 stages:
-  - stage: CheckBump
-    displayName: "Check for Auto Version Bump"
+  - stage: Build
+    variables:
+      - ${{ if eq(variables['is_main_branch'], 'true') }}:
+          - group: stacks-pypi-creds-prod
+      - ${{ else }}:
+          - group: stacks-pypi-creds-test
     jobs:
       - job: Check
         displayName: "Determine if pipeline should run"
@@ -54,17 +58,9 @@ stages:
               fi
             name: Check
             displayName: "Detect version bump"
-  - stage: Build
-    dependsOn: CheckBump
-    condition: ne(dependencies.CheckBump.outputs['Check.skipPipeline'], 'true')
-
-    variables:
-      - ${{ if eq(variables['is_main_branch'], 'true') }}:
-          - group: stacks-pypi-creds-prod
-      - ${{ else }}:
-          - group: stacks-pypi-creds-test
-    jobs:
       - job: Build
+        dependsOn: Check
+        condition: ne(dependencies.Check.outputs['Check.skipPipeline'], 'true')
         pool:
           vmImage: $(pool_vm_image)
 
