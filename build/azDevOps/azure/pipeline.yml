@@ -60,11 +60,21 @@ stages:
               script: taskctl poetry_setup
 
           - task: Bash@3
+            name: CheckNextVersion
+            displayName: "TaskCTL: Check next version"
+#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl check_next_version
+
+          - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             inputs:
               targetType: inline
               script: taskctl bump_version
+            env:
+              VERSION_CHANGED: $(versionChanged)
 
           - task: Bash@3
             displayName: "TaskCTL: Set Environment Variables"

@@ -4,7 +4,7 @@ parameters:
 steps:
   - task: Bash@3
     name: ${{ parameters.name }}
-    displayName: "Detect version bump"
+    displayName: "Check last commit"
     inputs:
       targetType: inline
       script: |
