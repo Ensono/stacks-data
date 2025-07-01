@@ -1,16 +1,8 @@
 parameters:
-  TaskctlVersion: 1.5.2
+  TaskctlVersion: 1.5.3
 
 steps:
-  - checkout: self
-    fetchDepth: 0
-    persistCredentials: true
-
-  - script: |
-      echo "Switching to source branch: $(System.PullRequest.SourceBranch)"
-      git checkout $(System.PullRequest.SourceBranch)
-      git log -1
-    displayName: "Checkout PR source branch"
+  - template: checkout-source.yml
 
   # Install Taskfile so that the tests can be run
   - task: Bash@3
