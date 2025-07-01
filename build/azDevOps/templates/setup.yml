@@ -4,7 +4,7 @@ parameters:
 steps:
   - template: checkout-source.yml
 
-  # Install Taskfile so that the tests can be run
+  # Install taskctl so that the tests can be run
   - task: Bash@3
     displayName: "Install: Taskctl"
     inputs:
