@@ -57,7 +57,7 @@ stages:
             displayName: "Detect version bump"
   - stage: Build
     dependsOn: CheckBump
-    condition: eq(stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'], 'false')
+    condition: eq(stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'], 'true')
 
     variables:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
