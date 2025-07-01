@@ -31,8 +31,6 @@ stages:
         displayName: "Determine if pipeline should run"
         pool:
           vmImage: $(pool_vm_image)
-        outputs:
-          skip: $[ dependencies.Check.outputs['Check.skipPipeline'] ]
         steps:
           - checkout: self
             fetchDepth: 0
