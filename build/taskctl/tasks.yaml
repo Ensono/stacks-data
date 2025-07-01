@@ -42,22 +42,21 @@ tasks:
         apt-get install openjdk-17-jdk-headless -qq
         python3 -m poetry run pytest --junitxml "unit.xml"
 
-  cz:check_next_version:
-  context: powershell
-  description: Check if version bump is required using Commitizen
-  command:
-    - |
-      echo "Checking if version bump is needed..."
-      $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
-      Write-Output $bumpOutput
-      if ($bumpOutput -match 'NO_COMMITS_FOUND' -or $bumpOutput -match 'NO_COMMITS_TO_BUMP') {
-        Write-Host "No version bump required."
-        Write-Output "##vso[task.setvariable variable=versionChanged;isOutput=true]false"
-      }
-      else {
-        Write-Host "Version bump required."
-        Write-Output "##vso[task.setvariable variable=versionChanged;isOutput=true]true"
-      }
+  cz:should_bump:
+    context: powershell
+    description: Check if a version bump is required
+    command:
+      - |
+        echo "Checking if version bump is needed..."
+        $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
+        if ($bumpOutput -match 'NO_COMMITS_FOUND' -or $bumpOutput -match 'NO_COMMITS_TO_BUMP') {
+          Write-Host "No version bump required."
+          Write-Host "##vso[task.setvariable variable=versionChanged;isOutput=true]false"
+        }
+        else {
+          Write-Host "Version bump required."
+          Write-Host "##vso[task.setvariable variable=versionChanged;isOutput=true]true"
+        }
 
   cz:bump:
     context: powershell
