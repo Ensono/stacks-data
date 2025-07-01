@@ -24,6 +24,7 @@ stages:
     displayName: "Check for Auto Version Bump"
     jobs:
       - job: Check
+        name: Check
         displayName: "Determine if pipeline should run"
         pool:
           vmImage: $(pool_vm_image)
