@@ -57,7 +57,7 @@ stages:
             displayName: "Detect version bump"
   - stage: Build
     dependsOn: CheckBump
-    condition: ne(stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'], 'true')
+    condition: ne(stageDependencies.CheckBump.outputs['Check.DetectBump.skipPipeline'], 'true')
 
     variables:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
@@ -70,11 +70,6 @@ stages:
           vmImage: $(pool_vm_image)
 
         steps:
-          - bash:
-              echo "Value: $[ stageDependencies.CheckBump.Check.outputs['DetectBump.skipPipeline'] ]"
-            displayName: "Debug: Output value from CheckBump"
-
-
           - template: ../templates/setup.yml
             parameters:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
