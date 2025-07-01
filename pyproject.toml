@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
-version = "1.6.0"
+version = "1.7.0"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Ensono Stacks <stacks@ensono.com>"
