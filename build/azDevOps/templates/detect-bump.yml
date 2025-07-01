@@ -1,0 +1,21 @@
+parameters:
+  name: DetectBump
+
+steps:
+  - task: Bash@3
+    name: ${{ parameters.name }}
+    displayName: "Detect version bump"
+    inputs:
+      targetType: inline
+      script: |
+        echo "Checking last commit message..."
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        echo "Last commit: $COMMIT_MSG"
+
+        if [[ "$COMMIT_MSG" =~ ^bump:\ version ]]; then
+          echo "Auto version bump detected - skipping pipeline."
+          echo "##vso[task.setvariable variable=skipPipeline;isOutput=true]true"
+        else
+          echo "No auto version bump detected - proceeding with the pipeline."
+          echo "##vso[task.setvariable variable=skipPipeline;isOutput=true]false"
+        fi
