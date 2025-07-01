@@ -54,27 +54,10 @@ stages:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
           - task: Bash@3
-            displayName: "Debug: Git on Agent"
-            inputs:
-              targetType: inline
-              script: |
-                echo "Build.SourcesDirectory: $BUILD_SOURCESDIRECTORY"
-                cd "$BUILD_SOURCESDIRECTORY"
-
-                echo "Is this a git repo?"
-                git rev-parse --is-inside-work-tree
-                echo "Current branch:"
-                git branch
-                echo "Most recent commit:"
-                git log -1
-
-          - task: Bash@3
             displayName: "TaskCTL: Poetry Project Setup"
             inputs:
               targetType: inline
               script: taskctl poetry_setup
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
@@ -82,16 +65,12 @@ stages:
             inputs:
               targetType: inline
               script: taskctl bump_version
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Set Environment Variables"
             inputs:
               targetType: inline
               script: taskctl set_env_vars
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Set Build Number"
@@ -99,7 +78,6 @@ stages:
               targetType: inline
               script: taskctl buildnumber
             env:
-              SOURCEDIR: $(Build.SourcesDirectory)
               DOCKER_IMAGE_TAG: $(build_number)
 
           - script: |
@@ -112,16 +90,12 @@ stages:
             inputs:
               targetType: inline
               script: taskctl lint
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
 
 #          - task: Bash@3
 #            displayName: "TaskCTL: Test"
 #            inputs:
 #              targetType: inline
 #              script: taskctl test
-#          env:
-#            SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Results"
@@ -134,8 +108,6 @@ stages:
             inputs:
               targetType: inline
               script: taskctl build
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Push Version Bump Commit"
@@ -143,8 +115,6 @@ stages:
             inputs:
               targetType: inline
               script: taskctl push_bump
-            env:
-              SOURCEDIR: $(Build.SourcesDirectory)
 
           - task: Bash@3
             displayName: "TaskCTL: Publish"
@@ -153,7 +123,6 @@ stages:
               targetType: inline
               script: taskctl publish
             env:
-              SOURCEDIR: $(Build.SourcesDirectory)
               REPO_URL: $(repo)
               TOKEN: $(token)
               VERSION_NUMBER: $(version_number)
