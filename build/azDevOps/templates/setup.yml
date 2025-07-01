@@ -2,7 +2,7 @@ parameters:
   TaskctlVersion: 1.5.3
 
 steps:
-  - template: checkout-source.yml
+#  - template: checkout-source.yml
 
   # Install taskctl so that the tests can be run
   - task: Bash@3
