@@ -68,92 +68,92 @@ stages:
                 echo "Most recent commit:"
                 git log -1
 
-#          - task: Bash@3
-#            displayName: "TaskCTL: Poetry Project Setup"
-#            inputs:
-#              targetType: inline
-#              script: taskctl poetry_setup
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Bump Version"
-##            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-#            inputs:
-#              targetType: inline
-#              script: taskctl bump_version
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Set Environment Variables"
-#            inputs:
-#              targetType: inline
-#              script: taskctl set_env_vars
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Set Build Number"
-#            inputs:
-#              targetType: inline
-#              script: taskctl buildnumber
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#              DOCKER_IMAGE_TAG: $(build_number)
-#
-#          - script: |
-#              echo "version_number: $(version_number)"
-#              echo "build_number: $(build_number)"
-#            displayName: "Debug: Show version and build numbers"
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Lint"
-#            inputs:
-#              targetType: inline
-#              script: taskctl lint
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-##          - task: Bash@3
-##            displayName: "TaskCTL: Test"
-##            inputs:
-##              targetType: inline
-##              script: taskctl test
-##          env:
-##            SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: PublishTestResults@2
-#            displayName: "Publish Test Results"
-#            inputs:
-#              testResultsFiles: "*.xml"
-#            condition: succeededOrFailed()
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Build"
-#            inputs:
-#              targetType: inline
-#              script: taskctl build
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Push Version Bump Commit"
-##            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-#            inputs:
-#              targetType: inline
-#              script: taskctl push_bump
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Publish"
+          - task: Bash@3
+            displayName: "TaskCTL: Poetry Project Setup"
+            inputs:
+              targetType: inline
+              script: taskctl poetry_setup
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl bump_version
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Set Environment Variables"
+            inputs:
+              targetType: inline
+              script: taskctl set_env_vars
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Set Build Number"
+            inputs:
+              targetType: inline
+              script: taskctl buildnumber
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+              DOCKER_IMAGE_TAG: $(build_number)
+
+          - script: |
+              echo "version_number: $(version_number)"
+              echo "build_number: $(build_number)"
+            displayName: "Debug: Show version and build numbers"
+
+          - task: Bash@3
+            displayName: "TaskCTL: Lint"
+            inputs:
+              targetType: inline
+              script: taskctl lint
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+#          - task: Bash@3
+#            displayName: "TaskCTL: Test"
 #            inputs:
 #              targetType: inline
-#              script: taskctl publish
-#            env:
-#              SOURCEDIR: $(Build.SourcesDirectory)
-#              REPO_URL: $(repo)
-#              TOKEN: $(token)
-#              VERSION_NUMBER: $(version_number)
+#              script: taskctl test
+#          env:
+#            SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Results"
+            inputs:
+              testResultsFiles: "*.xml"
+            condition: succeededOrFailed()
+
+          - task: Bash@3
+            displayName: "TaskCTL: Build"
+            inputs:
+              targetType: inline
+              script: taskctl build
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Push Version Bump Commit"
+#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl push_bump
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "TaskCTL: Publish"
+            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            inputs:
+              targetType: inline
+              script: taskctl publish
+            env:
+              SOURCEDIR: $(Build.SourcesDirectory)
+              REPO_URL: $(repo)
+              TOKEN: $(token)
+              VERSION_NUMBER: $(version_number)
