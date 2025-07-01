@@ -30,7 +30,7 @@ stages:
         steps:
           - template: ../templates/checkout-source.yml
 
-          - template: ../templates/steps/detect-bump.yml
+          - template: ../templates/detect-bump.yml
             parameters:
               name: DetectBump
   - stage: Build
