@@ -1,0 +1,40 @@
+variables:
+  - name: self_repo_dir
+    value: "$(Agent.BuildDirectory)/s/$(self_repo)"
+  - name: self_repo_tf_src
+    value: deploy/azure/infra
+  - name: self_repo_tf_dir
+    value: "$(self_repo_dir)/$(self_repo_tf_src)"
+
+  - name: is_main_branch
+    ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: true
+    ${{ else }}:
+      value: false
+
+  # Agent configuration
+  - name: TaskctlVersion
+    value: 1.5.3
+  - name: pool_vm_image
+    value: ubuntu-22.04
+  - name: agentpool_name
+    value: ensono-stacks-data-build
+
+  # Service Connections
+  - name: service_connection
+    value: Ensono.Stacks.Pipeline.Builds
+  - name: github_release_service_connection
+    value: GitHubReleases
+
+  - name: pythonVersion
+    value: "3.11"
+
+  - name: COMMIT_ID
+    value: $(Build.SourceVersion)
+  - name: OWNER
+    value: ensono
+  - name: REPOSITORY
+    value: stacks-data
+  - name: ARTIFACTS_DIR
+    value: dlist/
+  - group: release-github-credentials
