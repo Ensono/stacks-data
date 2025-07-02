@@ -70,7 +70,7 @@ stages:
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-            condition: eq(variables['Check.CheckVersionBump.versionChanged'], 'true')
+            condition: eq($(version_changed), 'true')
             inputs:
               targetType: inline
               script: taskctl bump_version
@@ -121,7 +121,7 @@ stages:
           - task: Bash@3
             displayName: "TaskCTL: Push Version Bump Commit"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-            condition: eq(variables['Check.CheckVersionBump.versionChanged'], 'true')
+            condition: eq($(version_changed), 'true')
             inputs:
               targetType: inline
               script: taskctl push_bump
