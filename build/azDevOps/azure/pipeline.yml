@@ -70,7 +70,7 @@ stages:
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-            condition: eq($(version_changed), 'true')
+#            condition: eq($(version_changed), 'true')
             inputs:
               targetType: inline
               script: taskctl bump_version
@@ -92,6 +92,7 @@ stages:
           - script: |
               echo "version_number: $(version_number)"
               echo "build_number: $(build_number)"
+              echo "version_changed: $(version_changed)"
             displayName: "Debug: Show version and build numbers"
 
           - task: Bash@3
