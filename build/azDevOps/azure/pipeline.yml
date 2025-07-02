@@ -59,18 +59,9 @@ stages:
               targetType: inline
               script: taskctl poetry_setup
 
-#          - task: Bash@3
-#            name: CheckVersionBump
-#            displayName: "TaskCTL: Check version bump"
-##            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-#            inputs:
-#              targetType: inline
-#              script: taskctl check_should_bump
-
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-#            condition: eq(variables['version_changed'], 'true')
             inputs:
               targetType: inline
               script: taskctl bump_version
@@ -129,7 +120,8 @@ stages:
 
           - task: Bash@3
             displayName: "TaskCTL: Publish"
-            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            condition: eq(variables['version_changed'], 'true')
             inputs:
               targetType: inline
               script: taskctl publish
