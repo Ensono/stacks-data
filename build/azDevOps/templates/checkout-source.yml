@@ -1,10 +1,11 @@
 steps:
   - checkout: self
     fetchDepth: 0
+#    fetchTags: false
     persistCredentials: true
 
   - script: |
       echo "Switching to source branch: $(System.PullRequest.SourceBranch)"
       git checkout $(System.PullRequest.SourceBranch)
-      git log -1
+#      git log -1
     displayName: "Checkout source branch"
