@@ -12,10 +12,6 @@ variables:
     ${{ else }}:
       value: false
 
-  # GitHub infomration
-  - name: create_release
-    value: false
-
   # Agent configuration
   - name: TaskctlVersion
     value: 1.5.3
@@ -31,7 +27,7 @@ variables:
     value: GitHubReleases
 
   - name: pythonVersion
-    value: "3.10"
+    value: "3.11"
 
   - name: COMMIT_ID
     value: $(Build.SourceVersion)
