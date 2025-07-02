@@ -1,0 +1,115 @@
+tasks:
+  poetry:setup:
+    context: powershell
+    description: Ensure that the poetry is configured correctly
+    command:
+      - |
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+        poetry config installer.max-workers 10
+        python3 -m poetry install --no-interaction --extras "behave cli data-quality"
+
+  set:env_vars:
+    context: powershell
+    description: Extract and export version_number and build_number
+    command:
+      - |
+        $version = poetry version -s
+        $buildId = $env:BUILD_BUILDID
+        $buildNumber = "$version-$buildId"
+        Write-Host "##vso[task.setvariable variable=version_number]$version"
+        Write-Host "##vso[task.setvariable variable=build_number]$buildNumber"
+
+  buildnumber:
+    context: powershell
+    description: Update the build number
+    command:
+      - Update-BuildNumber
+
+  poetry:lint:
+    context: powershell
+    description: Perform Pre-Commit linting
+    command:
+      - git config --global --add safe.directory /app && python3 -m poetry run pre-commit run --all-files
+
+  poetry:test:
+    context: powershell
+    description: Run Tests
+    command:
+      - |
+        #TODO: Move the installation of java into docker image
+        apt-get update
+        apt-get install openjdk-17-jdk-headless -qq
+        python3 -m poetry run pytest --junitxml "unit.xml"
+
+  cz:bump:
+    context: powershell
+    description: Bump version based on Conventional Commits using Commitizen
+    command:
+      - |
+        echo "Checking if version bump is needed..."
+        git config --global --add safe.directory /app
+        $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
+        echo "Bump output: $bumpOutput"
+        if (($bumpOutput -match "NO_COMMITS_FOUND") -or ($bumpOutput -match "NO_COMMITS_TO_BUMP")) {
+          Write-Host "No version bump required."
+          Write-Host "##vso[task.setvariable variable=version_changed]false"
+        }
+        else {
+          Write-Host "Version bump required."
+          Write-Host "##vso[task.setvariable variable=version_changed]true"
+          git config user.email "stacks@ensono.com"
+          git config user.name "Ensono Stacks"
+          python3 -m poetry run cz bump --yes --changelog
+        }
+
+  cz:push-bump:
+    context: powershell
+    description: Push version bump to GitHub
+    command:
+      - |
+        git config --global --add safe.directory /app
+        git push origin HEAD
+#        Tags are pushed with Publish-GitHubRelease in a separate task
+#        git push origin --tags
+
+  poetry:build:
+    context: powershell
+    description: Build package
+    command:
+      - git config --global --add safe.directory /app && poetry build
+
+  poetry:publish:
+    context: powershell
+    description: Publish package
+    command:
+      - |
+        poetry config repositories.pypi '${REPO_URL}/legacy/'
+        poetry config pypi-token.pypi '$TOKEN'
+        poetry publish -r pypi
+
+#  TODO: Switch to using the GitHub CLI for publishing releases when available on independent runner
+  publish:github:
+    context: powershell
+    description: Publish Release to GitHub
+    command:
+      - Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
+
+  debug:env:
+    context: powershell
+    description: Debugging task to show the environment variables in the container
+    command:
+      - dir env:/
+
+  debug:location:
+    context: powershell
+    command:
+      - Write-Host "***** DEBUG *****" && get-childitem -filter "*opencover.xml" -recurse
+
+  debug:sleep:
+    context: powershell
+    command:
+      - echo "Sleeping for {{ .sleep }}"
+      - sleep {{ .sleep }}
+    variables:
+      sleep: 30

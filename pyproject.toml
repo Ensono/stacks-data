@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
-version = "1.1.0"
+version = "1.15.0"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
     "Ensono Stacks <stacks@ensono.com>"
@@ -10,6 +10,12 @@ homepage = "https://github.com/Ensono/stacks-data"
 packages = [
     { include = "stacks" },
 ]
+
+[tool.commitizen]
+# Use the Conventional Commits standard to parse commits and decide how to bump versions.
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_provider = "poetry"
 
 [build-system]
 requires = ["poetry-core"]
@@ -53,6 +59,7 @@ pydocstyle = "^6.3.0"
 tomli = "^2.0.1"
 pytest-mock = "^3.14.0"
 coverage = "^7.6.1"
+commitizen = "^4.8.3"
 
 [tool.poetry.scripts]
 datastacks = "stacks.data.cli.datastacks_cli:cli"
