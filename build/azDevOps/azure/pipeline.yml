@@ -111,6 +111,14 @@ stages:
               script: taskctl build
 
           - task: Bash@3
+            displayName: "TaskCTL: Setup GitHub CLI"
+            #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+            condition: eq(variables['version_changed'], 'true')
+            inputs:
+              targetType: inline
+              script: taskctl setup_gh_cli
+
+          - task: Bash@3
             displayName: "TaskCTL: Push Version Bump Commit"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
             condition: eq(variables['version_changed'], 'true')
