@@ -35,7 +35,7 @@ stages:
               name: DetectBump
 
   - stage: Build
-    dependsOn: CheckBump
+    dependsOn: ShouldRun
     condition: eq(stageDependencies.ShouldRun.outputs['Check.DetectBump.skipPipeline'], 'false')
 
     variables:
