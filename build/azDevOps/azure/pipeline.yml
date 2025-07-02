@@ -4,13 +4,11 @@ pr:
   branches:
     include:
       - "main"
-  autoCancel: false
 
 trigger:
   branches:
     include:
       - "main"
-  autoCancel: false
 
 variables:
   - template: pipeline-vars.yml
