@@ -1,7 +1,7 @@
 name: "$(Build.SourceBranchName)-init"
 
 pr:
-  autoCancel: true
+  autoCancel: false
   branches:
     include:
       - "main"
