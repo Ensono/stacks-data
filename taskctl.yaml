@@ -14,8 +14,6 @@ pipelines:
     - task: poetry:lint
   test:
     - task: poetry:test
-  setup_gh_cli:
-    - task: setup:gh-cli
   bump_version:
     - task: cz:bump
   push_bump:
