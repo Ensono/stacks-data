@@ -60,7 +60,7 @@ tasks:
           Write-Host "##vso[task.setvariable variable=version_changed]true"
           git config user.email "stacks@ensono.com"
           git config user.name "Ensono Stacks"
-          python3 -m poetry run cz bump --yes
+          python3 -m poetry run cz bump --yes --changelog
         }
 
   cz:push-bump:
@@ -71,6 +71,15 @@ tasks:
         git config --global --add safe.directory /app
         git push origin HEAD
         git push origin --tags
+        $version = $env:VERSION_NUMBER
+        if (-not $version) {
+          Write-Error "VERSION_NUMBER environment variable is not set."
+          exit 1
+        }
+
+        Write-Host "Creating GitHub release for tag $version"
+        $changelog = cz changelog --dry-run
+        gh release create "v$version" --title "v$version" --notes "$changelog"
 
   poetry:build:
     context: powershell
