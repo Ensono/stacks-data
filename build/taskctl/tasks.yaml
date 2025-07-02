@@ -49,6 +49,7 @@ tasks:
       - |
         echo "Checking if version bump is needed..."
         $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
+        echo "Bump output: $bumpOutput"
         if (($bumpOutput -match "NO_COMMITS_FOUND") -or ($bumpOutput -match "NO_COMMITS_TO_BUMP")) {
           Write-Host "No version bump required."
           Write-Host "##vso[task.setvariable variable=version_changed]false"
