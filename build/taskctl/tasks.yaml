@@ -42,9 +42,27 @@ tasks:
         apt-get install openjdk-17-jdk-headless -qq
         python3 -m poetry run pytest --junitxml "unit.xml"
 
-  cz:should_bump:
+#  cz:should_bump:
+#    context: powershell
+#    description: Check if a version bump is required
+#    command:
+#      - |
+#        echo "Checking if version bump is needed..."
+#        git config --global --add safe.directory /app
+#        $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
+#        echo "Bump output: $bumpOutput"
+#        if (($bumpOutput -match "NO_COMMITS_FOUND") -or ($bumpOutput -match "NO_COMMITS_TO_BUMP")) {
+#          Write-Host "No version bump required."
+#          Write-Host "##vso[task.setvariable variable=version_changed]false"
+#        }
+#        else {
+#          Write-Host "Version bump required."
+#          Write-Host "##vso[task.setvariable variable=version_changed]true"
+#        }
+
+  cz:bump:
     context: powershell
-    description: Check if a version bump is required
+    description: Bump version based on Conventional Commits using Commitizen and push to origin
     command:
       - |
         echo "Checking if version bump is needed..."
@@ -58,23 +76,16 @@ tasks:
         else {
           Write-Host "Version bump required."
           Write-Host "##vso[task.setvariable variable=version_changed]true"
+          git config user.email "stacks@ensono.com"
+          git config user.name "Ensono Stacks"
+          echo "VERSION_CHANGED: $VERSION_CHANGED"
+          echo "Current branch:"
+          git branch
+          echo "Most recent commit:"
+          git log -1
+          git rev-parse --is-inside-work-tree
+          python3 -m poetry run cz bump --yes
         }
-
-  cz:bump:
-    context: powershell
-    description: Bump version based on Conventional Commits using Commitizen and push to origin
-    command:
-      - |
-        git config --global --add safe.directory /app
-        git config user.email "stacks@ensono.com"
-        git config user.name "Ensono Stacks"
-        echo "VERSION_CHANGED: $VERSION_CHANGED"
-        echo "Current branch:"
-        git branch
-        echo "Most recent commit:"
-        git log -1
-        git rev-parse --is-inside-work-tree
-        python3 -m poetry run cz bump --yes
 
   cz:push-bump:
     context: powershell

@@ -20,11 +20,11 @@ parameters:
     default: false
 
 stages:
-  - stage: CheckBump
-    displayName: "Check for Auto Version Bump"
+  - stage: ShouldRun
+    displayName: "Determine if pipeline should run"
     jobs:
       - job: Check
-        displayName: "Determine if pipeline should run"
+        displayName: "Check for Auto Version Bump"
         pool:
           vmImage: $(pool_vm_image)
         steps:
@@ -36,7 +36,7 @@ stages:
 
   - stage: Build
     dependsOn: CheckBump
-    condition: eq(stageDependencies.CheckBump.outputs['Check.DetectBump.skipPipeline'], 'false')
+    condition: eq(stageDependencies.ShouldRun.outputs['Check.DetectBump.skipPipeline'], 'false')
 
     variables:
       - ${{ if eq(variables['is_main_branch'], 'true') }}:
@@ -59,18 +59,18 @@ stages:
               targetType: inline
               script: taskctl poetry_setup
 
-          - task: Bash@3
-            name: CheckVersionBump
-            displayName: "TaskCTL: Check version bump"
-#            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-            inputs:
-              targetType: inline
-              script: taskctl check_should_bump
+#          - task: Bash@3
+#            name: CheckVersionBump
+#            displayName: "TaskCTL: Check version bump"
+##            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
+#            inputs:
+#              targetType: inline
+#              script: taskctl check_should_bump
 
           - task: Bash@3
             displayName: "TaskCTL: Bump Version"
 #            condition: and(succeeded(), or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true')))
-            condition: eq(variables['version_changed'], 'true')
+#            condition: eq(variables['version_changed'], 'true')
             inputs:
               targetType: inline
               script: taskctl bump_version
