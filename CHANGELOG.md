@@ -2,6 +2,12 @@
 
 - Merge pull request #24 from Ensono/dependabot/pip/h11-0.16.0
 
+## v1.15.0 (2025-07-02)
+
+### Feat
+
+- github cli setup
+
 ## v1.14.0 (2025-07-02)
 
 ### Feat
