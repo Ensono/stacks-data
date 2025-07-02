@@ -70,7 +70,8 @@ tasks:
       - |
         git config --global --add safe.directory /app
         git push origin HEAD
-        git push origin --tags
+#        Tags are pushed with Publish-GitHubRelease in a separate task
+#        git push origin --tags
 
   poetry:build:
     context: powershell
