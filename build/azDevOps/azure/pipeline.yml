@@ -117,6 +117,8 @@ stages:
             inputs:
               targetType: inline
               script: taskctl push_bump
+            env:
+              VERSION_NUMBER: $(version_number)
 
           - task: Bash@3
             displayName: "TaskCTL: Publish"
