@@ -44,7 +44,7 @@ tasks:
 
   cz:bump:
     context: powershell
-    description: Bump version based on Conventional Commits using Commitizen and push to origin
+    description: Bump version based on Conventional Commits using Commitizen
     command:
       - |
         echo "Checking if version bump is needed..."
@@ -70,6 +70,7 @@ tasks:
       - |
         git config --global --add safe.directory /app
         git push origin HEAD
+        git push origin --tags
 
   poetry:build:
     context: powershell
