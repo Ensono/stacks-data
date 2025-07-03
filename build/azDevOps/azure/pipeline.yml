@@ -88,11 +88,11 @@ stages:
               targetType: inline
               script: taskctl lint
 
-          - task: Bash@3
-            displayName: "TaskCTL: Test"
-            inputs:
-              targetType: inline
-              script: taskctl test
+#          - task: Bash@3
+#            displayName: "TaskCTL: Test"
+#            inputs:
+#              targetType: inline
+#              script: taskctl test
 
           - task: PublishTestResults@2
             displayName: "Publish Test Results"

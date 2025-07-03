@@ -4,6 +4,8 @@ steps:
     persistCredentials: true
 
   - script: |
-      echo "Switching to source branch: $(System.PullRequest.SourceBranch)"
-      git checkout $(System.PullRequest.SourceBranch)
+      echo "Switching to source branch: $BRANCH"
+      git checkout "${BRANCH#refs/heads/}"
     displayName: "Checkout source branch"
+    env:
+      BRANCH: $(branch_name)
