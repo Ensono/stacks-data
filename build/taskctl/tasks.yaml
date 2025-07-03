@@ -57,9 +57,7 @@ tasks:
         }
         else {
           Write-Host "Version bump required."
-          $releaseNotes = python3 -m poetry run cz changelog --incremental --dry-run --yes
           Write-Host "##vso[task.setvariable variable=version_changed]true"
-          Write-Host "##vso[task.setvariable variable=release_notes]$releaseNotes"
           git config user.email "stacks@ensono.com"
           git config user.name "Ensono Stacks"
           python3 -m poetry run cz bump --yes --changelog
@@ -67,13 +65,11 @@ tasks:
 
   cz:push-bump:
     context: powershell
-    description: Push version bump to GitHub and set COMMIT_ID to latest commit
+    description: Push version bump to GitHub
     command:
       - |
         git config --global --add safe.directory /app
         git push origin HEAD
-        $commit = git rev-parse HEAD
-        Write-Host "##vso[task.setvariable variable=COMMIT_ID]$commit"
 #        Tags are pushed with Publish-GitHubRelease in a separate task
 #        git push origin --tags
 
@@ -92,11 +88,12 @@ tasks:
         poetry config pypi-token.pypi '$TOKEN'
         poetry publish -r pypi
 
+#  TODO: Switch to using the GitHub CLI for publishing releases when available on independent runner
   publish:github:
     context: powershell
     description: Publish Release to GitHub
     command:
-      - Publish-GitHubRelease -publishRelease $true
+      - Publish-GitHubRelease -generateReleaseNotes $true -publishRelease $true
 
   debug:env:
     context: powershell
