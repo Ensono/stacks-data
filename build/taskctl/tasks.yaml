@@ -65,11 +65,13 @@ tasks:
 
   cz:push-bump:
     context: powershell
-    description: Push version bump to GitHub
+    description: Push version bump to GitHub and set COMMIT_ID to latest commit
     command:
       - |
         git config --global --add safe.directory /app
         git push origin HEAD
+        $commit = git rev-parse HEAD
+        Write-Host "##vso[task.setvariable variable=COMMIT_ID]$commit"
 #        Tags are pushed with Publish-GitHubRelease in a separate task
 #        git push origin --tags
 
