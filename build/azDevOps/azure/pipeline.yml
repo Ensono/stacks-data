@@ -17,7 +17,7 @@ variables:
 
 parameters:
   - name: force_publish
-    displayName: Force publish to the python repository
+    displayName: Force publish to PyPI and GitHub
     type: boolean
     default: false
 

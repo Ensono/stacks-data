@@ -88,7 +88,6 @@ tasks:
         poetry config pypi-token.pypi '$TOKEN'
         poetry publish -r pypi
 
-#  TODO: Switch to using the GitHub CLI for publishing releases when available on independent runner
   publish:github:
     context: powershell
     description: Publish Release to GitHub
