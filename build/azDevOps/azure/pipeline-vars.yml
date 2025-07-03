@@ -12,6 +12,9 @@ variables:
     ${{ else }}:
       value: false
 
+  - name: branch_name
+    value: $[coalesce(variables['System.PullRequest.SourceBranch'], variables['Build.SourceBranch'])]
+
   # Agent configuration
   - name: TaskctlVersion
     value: 1.5.3
