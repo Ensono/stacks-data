@@ -6,12 +6,8 @@ workloads.
 import json
 import uuid
 from datetime import datetime
-
-import polling2
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
-from behave import given, step, then
-from behave.runner import Context
 
 from stacks_data.constants import (
     ADLS_ACCOUNT,
@@ -26,6 +22,17 @@ from stacks_data.azure.data_factory import (
     create_adf_pipeline_run,
 )
 from stacks_data.azure.datalake.adls import AdlsClient
+
+try:
+    from behave import given, step, then
+    from behave.runner import Context
+    import polling2
+except ImportError:
+    raise ImportError(
+        "Required dependencies for Stacks Data Behave testing are not installed. "
+        "Please install them using: pip install stacks-data[behave]"
+    )
+
 
 credential = DefaultAzureCredential()
 adf_client = DataFactoryManagementClient(credential, AZURE_SUBSCRIPTION_ID)

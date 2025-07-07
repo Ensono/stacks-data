@@ -2,12 +2,12 @@
 
 Classes specifying the configuration used for generation of data workloads from templates.
 """
+import yaml
+from abc import ABC, abstractmethod
 from datetime import date, datetime
 from enum import Enum
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
-import yaml
-from abc import ABC, abstractmethod
 
 from stacks_data.utils import get_latest_package_version
 

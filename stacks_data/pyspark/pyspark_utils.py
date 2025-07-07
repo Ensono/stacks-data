@@ -4,7 +4,6 @@ import os
 from typing import Any, Optional
 from delta.tables import DeltaTable
 from pyspark.errors import AnalysisException
-
 from pyspark.sql import DataFrame, SparkSession
 
 from stacks_data.constants import DEFAULT_SPARK_CONFIG

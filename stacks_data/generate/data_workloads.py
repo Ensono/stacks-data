@@ -3,12 +3,21 @@
 This module provides utility functions to automate the generation of data pipelines and workloads. It facilitates
 rendering templates based on the provided config, and writing out the rendered templates to the specified directories.
 """
-import click
 import os
-from stacks_data.generate.template_config import WorkloadConfigBaseModel
-from jinja2 import Environment, PackageLoader
 from pathlib import Path
 from typing import Type
+
+from stacks.data.generate.template_config import WorkloadConfigBaseModel
+
+try:
+    import click
+    from jinja2 import Environment, PackageLoader
+except ImportError:
+    raise ImportError(
+        "Required dependencies for Datastacks CLI are not installed. "
+        "Please install them using: pip install stacks-data[cli]"
+    )
+
 
 GENERATE_PACKAGE_NAME = "stacks_data.generate"
 TEMPLATES_DIRECTORY = "templates"
