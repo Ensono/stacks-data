@@ -47,6 +47,7 @@ tasks:
     description: Bump version based on Conventional Commits using Commitizen
     command:
       - |
+        $ErrorActionPreference = "Stop"
         echo "Checking if version bump is needed..."
         git config --global --add safe.directory /app
         $bumpOutput = python3 -m poetry run cz bump --dry-run --yes 2>&1
@@ -68,6 +69,7 @@ tasks:
     description: Push version bump to GitHub and set COMMIT_ID to latest commit
     command:
       - |
+        $ErrorActionPreference = "Stop"
         git config --global --add safe.directory /app
         git push origin HEAD
         $commit = git rev-parse HEAD
@@ -86,9 +88,20 @@ tasks:
     description: Publish package
     command:
       - |
-        poetry config repositories.pypi '${REPO_URL}/legacy/'
-        poetry config pypi-token.pypi '$TOKEN'
-        poetry publish -r pypi
+        $ErrorActionPreference = "Stop"
+        if ($env:REPO_URL -like "*test.pypi*") {
+          $repoName = "testpypi"
+        } else {
+          $repoName = "pypi"
+        }
+
+        Write-Host "Detected repository name: $repoName"
+        Write-Host "Setting repository URL: $($env:REPO_URL)/legacy/"
+
+        poetry config "repositories.$repoName" "$($env:REPO_URL)/legacy/"
+        poetry config "pypi-token.$repoName" "$env:TOKEN"
+
+        poetry publish -r $repoName
 
   publish:github:
     context: powershell
