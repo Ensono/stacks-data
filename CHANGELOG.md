@@ -1,3 +1,53 @@
+## v2.0.0 (2025-07-07)
+
+### Feat
+
+- fix
+- revert to default release notes
+- release notes
+- ADO build & publish pipeline
+- autoCancel false
+- autoCancel false
+- fix
+- publish
+- versioning
+- sync versioning
+- publish to pypi
+- publish in progress
+- releasing to github and changelog
+- github CLI wip
+- github cli setup
+- test publishing
+- github cli
+- publishing
+- changelog & github release
+- push tags based on commitizen
+- publish to github
+- cleanup
+- cleanup
+- cleanup
+- version changed testing
+- version changed
+- version changed
+- version changed
+- version changed
+- version changed
+- version changed
+- powershell syntax
+- test version bump
+- test version bump
+- test version bump
+- adjust ADO pipeline
+- update pyproject.toml
+- Use Commitizen for library versioning
+- ADO build & publish pipeline
+
+### Fix
+
+- 2890 fix bump and publish to pypi
+- remove debug & SOURCEDIR env
+- Merge pull request #24 from Ensono/dependabot/pip/h11-0.16.0
+
 ## v1.0.4 (2024-11-20)
 
 ## v1.0.0 (2023-12-13)
