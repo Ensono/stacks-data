@@ -88,9 +88,20 @@ tasks:
     description: Publish package
     command:
       - |
-        poetry config repositories.pypi "${REPO_URL}/legacy/"
-        poetry config pypi-token.pypi "$TOKEN"
-        poetry publish
+        $ErrorActionPreference = "Stop"
+        if ($env:REPO_URL -like "*test.pypi*") {
+          $repoName = "testpypi"
+        } else {
+          $repoName = "pypi"
+        }
+
+        Write-Host "Detected repository name: $repoName"
+        Write-Host "Setting repository URL: $($env:REPO_URL)/legacy/"
+
+        poetry config "repositories.$repoName" "$($env:REPO_URL)/legacy/"
+        poetry config "pypi-token.$repoName" "$env:TOKEN"
+
+        poetry publish -r $repoName
 
   publish:github:
     context: powershell
