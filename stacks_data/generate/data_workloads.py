@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Type
 
-from stacks.data.generate.template_config import WorkloadConfigBaseModel
+from stacks_data.generate.template_config import WorkloadConfigBaseModel
 
 try:
     import click
