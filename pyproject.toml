@@ -1,5 +1,6 @@
 [tool.poetry]
 name = "stacks-data"
+# Versioning is managed by commitizen, no need to manually update this.
 version = "1.0.4"
 description = "A suite of utilities to support data engineering workloads within an Ensono Stacks data platform."
 authors = [
