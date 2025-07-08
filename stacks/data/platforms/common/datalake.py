@@ -14,25 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 class DatalakeClient:
-    def __init__(self, storage_account_name: str, credential: Optional[TokenCredential] = None):
-        """Instantiate a new ADLS Client.
+    def __init__(self, account_url: str, credential: Optional[TokenCredential] = None):
+        """Instantiate a new Data Lake Client.
 
         Args:
-            storage_account_name: Name of the storage account.
+            account_url: The URL of the Azure or Fabric Data Lake Storage account.
             credential: The credentials to authenticate with, e.g. ManagedIdentityCredential or DefaultAzureCredential.
         """
-        self.storage_account_name = storage_account_name
-        self.account_url = self.get_account_url()
         self.credential = credential or DefaultAzureCredential()
-        self.datalake_client = DataLakeServiceClient(account_url=self.account_url, credential=self.credential)
-
-    def get_account_url(self) -> str:
-        """Returns the account URL for the data lake service."""
-        raise NotImplementedError("Subclasses must implement get_account_url")
-
-    def get_file_url(self, *args) -> str:
-        """Returns a fully qualified URL for a specific file in Azure Data Lake Storage (ADLS) or Lakehouse."""
-        raise NotImplementedError("Subclasses must implement get_file_url")
+        self.datalake_client = DataLakeServiceClient(account_url=account_url, credential=self.credential)
 
     def get_file_system_client(self, file_system: str) -> FileSystemClient:
         """Returns a filesystem client based on the given file system name.
@@ -47,7 +37,7 @@ class DatalakeClient:
 
         Args:
             file_system: Name of the file system (container name in ADLS, workspace ID in Lakehouse).
-            directory_path: Path of the directory to return:
+            directory_path: Path of the directory to return the client for:
                 - In ADLS, this is the full path within the container, e.g., "path/to/directory".
                 - In Lakehouse, this is typically the path to the files, e.g., "<lakehouse_id>/Files/".
 
@@ -68,7 +58,7 @@ class DatalakeClient:
             directory_substring: String to be found in directory.
 
         Returns:
-            List of directory paths containing the directory_substring prefix.
+            List of directory paths containing the specified substring.
         """
         fs_client = self.get_file_system_client(file_system)
         output_directory_paths = []
@@ -79,7 +69,7 @@ class DatalakeClient:
                     output_directory_paths.append(path.name)
         return output_directory_paths
 
-    def delete_directories(self, file_system: str, directory_paths: list):
+    def delete_directories(self, file_system: str, directory_paths: list) -> None:
         """Deletes a list of directories from a data lake.
 
         Args:
@@ -149,18 +139,18 @@ class DatalakeClient:
         logger.debug(f"Directory contents: {paths}")
         return paths
 
-    def upload_file_to_directory(self, file_system: str, directory_path: str, local_path: str, file_name: str) -> None:
+    def upload_file(self, file_system: str, target_directory_path: str, local_path: str, file_name: str) -> None:
         """Uploads a file to a specified directory in Azure Data Lake Storage or Lakehouse.
 
         Args:
             file_system: Name of the file system (container name in ADLS, workspace ID in Lakehouse).
-            directory_path: Path of the directory to upload to:
+            target_directory_path: Path of the directory to upload to:
                 - In ADLS, this is the full path within the container, e.g., "path/to/directory".
                 - In Lakehouse, this is typically the path to the files, e.g., "<lakehouse_id>/Files/Folder".
             local_path: Local path of the directory to upload from.
             file_name: Name of the file to be uploaded, e.g. "myfile.csv".
         """
-        directory_client = self.get_directory_client(file_system, directory_path)
+        directory_client = self.get_directory_client(file_system, target_directory_path)
         file_client = directory_client.get_file_client(file_name)
 
         with open(file=os.path.join(local_path, file_name), mode="rb") as data:

@@ -16,12 +16,12 @@ from stacks.data.constants import (
     AZURE_RESOURCE_GROUP_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.data.azure.data_factory import (
+from stacks.data.platforms.azure.data_factory import (
     check_adf_pipeline_in_complete_state,
     get_adf_pipeline_run,
     create_adf_pipeline_run,
 )
-from stacks.data.azure.datalake.adls import AdlsClient
+from stacks.data.platforms.azure.adls import AdlsClient
 
 try:
     from behave import given, step, then

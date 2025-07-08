@@ -5,7 +5,7 @@ extending the base DatalakeClient.
 """
 import logging
 
-from stacks.data.azure.datalake.base import DatalakeClient
+from stacks.data.platforms.common.datalake import DatalakeClient
 
 logger = logging.getLogger(__name__)
 
@@ -17,20 +17,21 @@ class AdlsClient(DatalakeClient):
         Args:
             storage_account_name: Name of the storage account
         """
-        super().__init__(storage_account_name)
+        self.storage_account_name = storage_account_name
+        super().__init__(self.get_account_url())
 
     def get_account_url(self) -> str:
         """Returns the account URL for the Azure Data Lake Storage (ADLS) service."""
         return f"https://{self.storage_account_name}.dfs.core.windows.net"
 
-    def get_file_url(self, file_system: str, file_name: str) -> str:
+    def get_file_url(self, container_name: str, file_name: str) -> str:
         """Returns an Azure Data Lake Storage (ADLS) URL for a specific file.
 
         Args:
-            file_system: Container name.
+            container_name: Container name.
             file_name: The name of the file (including any subdirectories within the container).
 
         Returns:
             Full ADLS URL for the specified file.
         """
-        return f"abfss://{file_system}@{self.storage_account_name}.dfs.core.windows.net/{file_name}"
+        return f"abfss://{container_name}@{self.storage_account_name}.dfs.core.windows.net/{file_name}"

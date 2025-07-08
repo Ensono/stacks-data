@@ -13,8 +13,8 @@ from typing import Any, Callable, Optional
 from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
-from stacks.data.azure.datalake.adls import AdlsClient
-from stacks.data.azure.blob import BlobStorageClient
+from stacks.data.platforms.azure.adls import AdlsClient
+from stacks.data.platforms.azure.blob import BlobStorageClient
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
 
 logger = logging.getLogger(__name__)

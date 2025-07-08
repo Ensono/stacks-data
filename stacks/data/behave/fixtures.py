@@ -13,8 +13,8 @@ from stacks.data.constants import (
     CONFIG_CONTAINER_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.data.azure.datalake.adls import AdlsClient
-from stacks.data.azure.blob import BlobStorageClient
+from stacks.data.platforms.azure.adls import AdlsClient
+from stacks.data.platforms.azure.blob import BlobStorageClient
 
 try:
     from behave import fixture
