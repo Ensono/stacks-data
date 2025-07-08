@@ -7,8 +7,8 @@ import pytest
 from pyspark.sql import DataFrame
 from tests.unit.pyspark.conftest import BRONZE_CONTAINER, SILVER_CONTAINER, TEST_CSV_DIR
 
-from stacks_data.azure.datalake.adls import AdlsClient
-from stacks_data.pyspark.etl import (
+from stacks.data.azure.datalake.adls import AdlsClient
+from stacks.data.pyspark.etl import (
     EtlSession,
     read_latest_rundate_data,
     save_files_as_delta_tables,
@@ -33,7 +33,7 @@ TEST_ENV_VARS_PARTIAL = {
 
 @pytest.fixture
 def mock_adls_client():
-    with patch("stacks_data.azure.datalake.base.DataLakeServiceClient", autospec=True) as mock_service_client:
+    with patch("stacks.data.azure.datalake.base.DataLakeServiceClient", autospec=True) as mock_service_client:
 
         def get_paths_side_effect(path, recursive=True):
             test_path = Path(TEST_CSV_DIR)
@@ -58,8 +58,8 @@ def mock_adls_client():
 
 @pytest.fixture
 def mock_etl_session(mock_adls_client, spark):
-    with patch("stacks_data.pyspark.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
-        "stacks_data.pyspark.etl.AdlsClient", return_value=mock_adls_client
+    with patch("stacks.data.pyspark.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
+        "stacks.data.pyspark.etl.AdlsClient", return_value=mock_adls_client
     ):
         etl_session = EtlSession("pyspark-test")
         yield etl_session
@@ -114,7 +114,7 @@ def test_set_spark_properties(spark):
         ),
     ],
 )
-@patch("stacks_data.azure.datalake.adls.AdlsClient.get_file_url")
+@patch("stacks.data.azure.datalake.adls.AdlsClient.get_file_url")
 def test_save_files_as_delta_tables(mock_get_file_url, mock_adls_client, spark, csv_files, expected_columns, tmp_path):
     def side_effect(container, file_name):
         if container == BRONZE_CONTAINER:
@@ -149,7 +149,7 @@ def test_save_files_as_delta_tables(mock_get_file_url, mock_adls_client, spark, 
         ("delta", {}, {}),
     ],
 )
-@patch("stacks_data.azure.datalake.adls.AdlsClient.get_file_url")
+@patch("stacks.data.azure.datalake.adls.AdlsClient.get_file_url")
 def test_save_files_as_delta_tables_different_formats(
     mock_get_file_url, mock_adls_client, spark, tmp_path, file_format, write_options, read_options
 ):
@@ -203,8 +203,8 @@ def test_read_latest_rundate_data(spark, mock_adls_client, tmp_path):
         df.write.format("delta").mode("overwrite").save(str(data_path))
 
     with patch(
-        "stacks_data.azure.datalake.adls.AdlsClient.get_directory_contents", side_effect=mock_get_directory_contents
-    ), patch("stacks_data.azure.datalake.adls.AdlsClient.get_file_url", side_effect=mock_get_file_url):
+        "stacks.data.azure.datalake.adls.AdlsClient.get_directory_contents", side_effect=mock_get_directory_contents
+    ), patch("stacks.data.azure.datalake.adls.AdlsClient.get_file_url", side_effect=mock_get_file_url):
 
         df = read_latest_rundate_data(spark, mock_adls_client, "dummy", str(tmp_path), "delta")
 
@@ -224,7 +224,7 @@ def test_transform_and_save_as_delta(spark, mock_adls_client, tmp_path):
     output_file_name = "test_delta_table"
     expected_output_path = str(tmp_path / output_file_name)
 
-    with patch("stacks_data.azure.datalake.adls.AdlsClient.get_file_url", return_value=expected_output_path):
+    with patch("stacks.data.azure.datalake.adls.AdlsClient.get_file_url", return_value=expected_output_path):
         transform_and_save_as_delta(spark, mock_adls_client, input_df, mock_transform, str(tmp_path), output_file_name)
 
     saved_df = spark.read.format("delta").load(expected_output_path)

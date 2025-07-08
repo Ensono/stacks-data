@@ -3,7 +3,7 @@ import sys
 from unittest.mock import Mock, patch
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import CreateRunResponse, PipelineRun
-from stacks_data.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run, get_data_factory_param
+from stacks.data.azure.data_factory import create_adf_pipeline_run, get_adf_pipeline_run, get_data_factory_param
 
 
 @pytest.fixture

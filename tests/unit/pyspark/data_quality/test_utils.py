@@ -6,7 +6,7 @@ from great_expectations.core.expectation_validation_result import ExpectationVal
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from pyspark.sql.types import StructType, DateType, StringType, BooleanType, StructField
 
-from stacks_data.pyspark.data_quality.utils import (
+from stacks.data.pyspark.data_quality.utils import (
     add_expectations_for_columns,
     add_expectation_suite,
     execute_validations,
@@ -244,7 +244,7 @@ def test_publish_quality_results_table(mocker, spark, expectation_results):
 
     expected_failure = spark.createDataFrame(data=expected_data, schema=dq_results_schema)
 
-    mocker.patch("stacks_data.pyspark.data_quality.utils.save_dataframe_as_delta")
+    mocker.patch("stacks.data.pyspark.data_quality.utils.save_dataframe_as_delta")
     failed_validations = publish_quality_results_table(
         spark, base_path, datasource_name, expectation_results, data_quality_run_date
     )

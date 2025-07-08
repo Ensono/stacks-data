@@ -9,7 +9,7 @@ authors = [
 readme = "README.md"
 homepage = "https://github.com/Ensono/stacks-data"
 packages = [
-    { include = "stacks_data" },
+    { include = "stacks" },
 ]
 
 [tool.commitizen]
@@ -63,7 +63,7 @@ coverage = "^7.6.1"
 commitizen = "^4.8.3"
 
 [tool.poetry.scripts]
-datastacks = "stacks_data.cli.datastacks_cli:cli"
+datastacks = "stacks.data.cli.datastacks_cli:cli"
 
 [tool.pytest.ini_options]
 log_cli = true

@@ -3,7 +3,7 @@ import pytest
 from requests.exceptions import RequestException
 from unittest.mock import Mock, patch
 
-from stacks_data.utils import (
+from stacks.data.utils import (
     filter_files_by_extension,
     find_placeholders,
     substitute_env_vars,
