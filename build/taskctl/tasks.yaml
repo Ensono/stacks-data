@@ -59,8 +59,10 @@ tasks:
         else {
           Write-Host "Version bump required."
           Write-Host "##vso[task.setvariable variable=version_changed]true"
-          git config user.email "stacks@ensono.com"
-          git config user.name "Ensono Stacks"
+          git config user.email $env:GITHUB_EMAIL
+          git config user.name $env:GITHUB_USERNAME
+          $repoUrl = "https://x-access-token:$($env:GITHUB_TOKEN)@github.com/$($env:BUILD_REPOSITORY_NAME).git"
+          git remote set-url origin $repoUrl
           python3 -m poetry run cz bump --yes --changelog
         }
 
