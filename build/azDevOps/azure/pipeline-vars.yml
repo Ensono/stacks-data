@@ -37,6 +37,4 @@ variables:
   - group: release-github-credentials
 
   # Variables for pushing to GitHub protected branches
-  - name: REPOSITORY_NAME
-    value: $(Build.Repository.Name)
   - group: github-creds
