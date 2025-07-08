@@ -88,23 +88,23 @@ stages:
               targetType: inline
               script: taskctl lint
 
-#          - task: Bash@3
-#            displayName: "TaskCTL: Test"
-#            inputs:
-#              targetType: inline
-#              script: taskctl test
-#
-#          - task: PublishTestResults@2
-#            displayName: "Publish Test Results"
-#            inputs:
-#              testResultsFiles: "*.xml"
-#            condition: succeededOrFailed()
-#
-#          - task: Bash@3
-#            displayName: "TaskCTL: Build"
-#            inputs:
-#              targetType: inline
-#              script: taskctl build
+          - task: Bash@3
+            displayName: "TaskCTL: Test"
+            inputs:
+              targetType: inline
+              script: taskctl test
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Results"
+            inputs:
+              testResultsFiles: "*.xml"
+            condition: succeededOrFailed()
+
+          - task: Bash@3
+            displayName: "TaskCTL: Build"
+            inputs:
+              targetType: inline
+              script: taskctl build
 
           - task: Bash@3
             displayName: "TaskCTL: Push Version Bump Commit"
@@ -123,17 +123,17 @@ stages:
               GITHUB_TOKEN: $(GITHUB_TOKEN)
               BUILD_REPOSITORY_NAME: $(Build.Repository.Name)
 
-#          - task: Bash@3
-#            displayName: "TaskCTL: Publish"
-#            condition: and(
-#              succeeded(),
-#              eq(variables['version_changed'], 'true'),
-#              or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true'))
-#              )
-#            inputs:
-#              targetType: inline
-#              script: taskctl publish
-#            env:
-#              REPO_URL: $(repo)
-#              TOKEN: $(token)
-#              VERSION_NUMBER: $(version_number)
+          - task: Bash@3
+            displayName: "TaskCTL: Publish"
+            condition: and(
+              succeeded(),
+              eq(variables['version_changed'], 'true'),
+              or(eq(${{ parameters.force_publish }}, 'true'), eq(variables['is_main_branch'], 'true'))
+              )
+            inputs:
+              targetType: inline
+              script: taskctl publish
+            env:
+              REPO_URL: $(repo)
+              TOKEN: $(token)
+              VERSION_NUMBER: $(version_number)
