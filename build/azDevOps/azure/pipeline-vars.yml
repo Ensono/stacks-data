@@ -1,4 +1,7 @@
 variables:
+  - name: self_repo_dir
+    value: "$(Agent.BuildDirectory)/s/$(self_repo)"
+
   - name: is_main_branch
     ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
       value: true
