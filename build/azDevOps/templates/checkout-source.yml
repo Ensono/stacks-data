@@ -8,4 +8,4 @@ steps:
       git checkout "${BRANCH#refs/heads/}"
     displayName: "Checkout source branch"
     env:
-      BRANCH: $(branch_name)
+      BRANCH: $(BRANCH_NAME)
