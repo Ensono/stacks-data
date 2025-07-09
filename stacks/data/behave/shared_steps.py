@@ -9,19 +9,19 @@ from datetime import datetime
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
 
-from stacks.data.constants import (
+from stacks.data.platforms.azure.constants import (
     ADLS_ACCOUNT,
     AZURE_SUBSCRIPTION_ID,
     AZURE_DATA_FACTORY_NAME,
     AZURE_RESOURCE_GROUP_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.data.azure.data_factory import (
+from stacks.data.platforms.azure.data_factory import (
     check_adf_pipeline_in_complete_state,
     get_adf_pipeline_run,
     create_adf_pipeline_run,
 )
-from stacks.data.azure.adls import AdlsClient
+from stacks.data.platforms.azure.adls import AdlsClient
 
 try:
     from behave import given, step, then
@@ -113,7 +113,7 @@ def check_all_files_present_in_adls(context: Context, output_files: str, contain
     adls_client = AdlsClient(ADLS_ACCOUNT)
     expected_files_list = json.loads(output_files)
     test_directory_name = f"{directory_name}/automated_tests/{context.test_run_id}"
-    assert adls_client.all_files_present_in_adls(container_name, test_directory_name, expected_files_list)
+    assert adls_client.all_files_present(container_name, test_directory_name, expected_files_list)
 
 
 @step("the ADF pipeline {pipeline_name} completed in less than {seconds} seconds")

@@ -7,14 +7,14 @@ import logging
 from os import listdir
 from os.path import isfile, join
 
-from stacks.data.constants import (
+from stacks.data.platforms.azure.constants import (
     ADLS_ACCOUNT,
     CONFIG_BLOB_ACCOUNT,
     CONFIG_CONTAINER_NAME,
     AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
 )
-from stacks.data.azure.adls import AdlsClient
-from stacks.data.azure.blob import BlobStorageClient
+from stacks.data.platforms.azure.adls import AdlsClient
+from stacks.data.platforms.azure.blob import BlobStorageClient
 
 try:
     from behave import fixture
@@ -40,25 +40,25 @@ def azure_adls_clean_up(context: Context, container_name: str, ingest_directory_
     """
     adls_client = AdlsClient(ADLS_ACCOUNT)
     logger.info("BEFORE SCENARIO: Deleting any existing test output data.")
-    automated_test_output_directory_paths = adls_client.filter_directory_paths_adls(
+    automated_test_output_directory_paths = adls_client.filter_directory_paths(
         container_name,
         ingest_directory_name,
         AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
     )
 
-    adls_client.delete_directories_adls(container_name, automated_test_output_directory_paths)
+    adls_client.delete_directories(container_name, automated_test_output_directory_paths)
 
     yield context
 
     logger.info("AFTER SCENARIO: Deleting automated test output data.")
 
-    automated_test_output_directory_paths = adls_client.filter_directory_paths_adls(
+    automated_test_output_directory_paths = adls_client.filter_directory_paths(
         container_name,
         ingest_directory_name,
         AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX,
     )
 
-    adls_client.delete_directories_adls(container_name, automated_test_output_directory_paths)
+    adls_client.delete_directories(container_name, automated_test_output_directory_paths)
 
 
 @fixture
