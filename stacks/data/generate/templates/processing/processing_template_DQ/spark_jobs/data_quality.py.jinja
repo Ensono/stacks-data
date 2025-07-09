@@ -1,9 +1,9 @@
 import logging
 
 from stacks.data.platforms.azure.data_factory import get_data_factory_param
-from stacks.data.constants import CONFIG_CONTAINER_NAME
+from stacks.data.platforms.azure.constants import CONFIG_CONTAINER_NAME
 from stacks.data.pyspark.data_quality.main import data_quality_main
-from stacks.data.logger import setup_logger
+from stacks.data.logger import get_logger
 
 CONFIG_PATH = "{{ workload_type }}/{{ pipeline_name }}/data_quality/data_quality_config.json"
 WORKLOAD_NAME = "{{ pipeline_name }}"

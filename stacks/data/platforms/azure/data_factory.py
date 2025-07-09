@@ -2,13 +2,14 @@
 
 This module provides a collection of helper functions related to Azure Data Factory.
 """
-import logging
 import sys
 
 from azure.mgmt.datafactory import DataFactoryManagementClient
 from azure.mgmt.datafactory.models import PipelineRun, CreateRunResponse
 
-logger = logging.getLogger(__name__)
+from stacks.data.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def create_adf_pipeline_run(

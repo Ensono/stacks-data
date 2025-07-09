@@ -8,7 +8,7 @@ from pyspark.sql import DataFrame
 from tests.unit.pyspark.conftest import BRONZE_CONTAINER, SILVER_CONTAINER, TEST_CSV_DIR
 
 from stacks.data.platforms.azure.adls import AdlsClient
-from stacks.data.pyspark.etl import (
+from stacks.data.platforms.azure.etl import (
     EtlSession,
     read_latest_rundate_data,
     save_files_as_delta_tables,
@@ -58,8 +58,8 @@ def mock_adls_client():
 
 @pytest.fixture
 def mock_etl_session(mock_adls_client, spark):
-    with patch("stacks.data.pyspark.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
-        "stacks.data.pyspark.etl.AdlsClient", return_value=mock_adls_client
+    with patch("stacks.data.platforms.azure.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
+        "stacks.data.platforms.azure.etl.AdlsClient", return_value=mock_adls_client
     ):
         etl_session = EtlSession("pyspark-test")
         yield etl_session

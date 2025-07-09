@@ -9,7 +9,7 @@ from datetime import datetime
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.datafactory import DataFactoryManagementClient
 
-from stacks.data.constants import (
+from stacks.data.platforms.azure.constants import (
     ADLS_ACCOUNT,
     AZURE_SUBSCRIPTION_ID,
     AZURE_DATA_FACTORY_NAME,

@@ -4,9 +4,9 @@ This module provides command-line interfaces to generate and manage data workloa
 """
 import logging
 
-from stacks.data.constants import CONFIG_CONTAINER_NAME
+from stacks.data.logger import get_logger
+from stacks.data.platforms.azure.constants import CONFIG_CONTAINER_NAME
 from stacks.data.pyspark.data_quality.main import data_quality_main
-from stacks.data.logger import setup_logger
 from stacks.data.generate.data_workloads import validate_yaml_config, generate_pipeline
 from stacks.data.generate.template_config import IngestWorkloadConfigModel, ProcessingWorkloadConfigModel
 
@@ -25,7 +25,7 @@ except ImportError:
 @click.option("--log-level", "-l", type=LogLevel(), default=logging.INFO)
 def cli(log_level):
     """Specify log level for Datastacks."""
-    setup_logger("datastacks", log_level)
+    get_logger("datastacks", log_level)
 
 
 @cli.group()

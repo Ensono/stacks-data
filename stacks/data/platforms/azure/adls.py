@@ -3,11 +3,10 @@
 This module provides a client for interacting with Azure Data Lake Storage (ADLS) Gen2,
 extending the base DatalakeClient.
 """
-import logging
-
+from stacks.data.logger import get_logger
 from stacks.data.platforms.common.datalake import DatalakeClient
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AdlsClient(DatalakeClient):

@@ -2,7 +2,6 @@
 
 This module provides a base client for Azure Data Lake Storage (ADLS) and Microsoft Fabric Lakehouse.
 """
-import logging
 import os
 from typing import Optional
 
@@ -10,7 +9,9 @@ from azure.core.credentials import TokenCredential
 from azure.identity import DefaultAzureCredential
 from azure.storage.filedatalake import DataLakeDirectoryClient, DataLakeServiceClient, FileSystemClient
 
-logger = logging.getLogger(__name__)
+from stacks.data.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DatalakeClient:

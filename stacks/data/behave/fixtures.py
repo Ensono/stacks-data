@@ -7,7 +7,7 @@ import logging
 from os import listdir
 from os.path import isfile, join
 
-from stacks.data.constants import (
+from stacks.data.platforms.azure.constants import (
     ADLS_ACCOUNT,
     CONFIG_BLOB_ACCOUNT,
     CONFIG_CONTAINER_NAME,

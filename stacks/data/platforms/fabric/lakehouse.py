@@ -2,17 +2,18 @@
 
 This module provides a client for interacting with Microsoft Fabric Lakehouse, extending the base DatalakeClient.
 """
-import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
 from azure.core.credentials import TokenCredential
 from azure.identity import DefaultAzureCredential
 from azure.storage.filedatalake import DataLakeDirectoryClient, FileSystemClient
 
+from stacks.data.logger import get_logger
 from stacks.data.platforms.common.datalake import DatalakeClient
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def get_credential() -> TokenCredential | DefaultAzureCredential:
@@ -70,6 +71,14 @@ class LakehouseClient:
             f"abfss://{self.workspace_id}@{self.storage_account_name}.dfs.fabric.microsoft.com/"
             f"{self.lakehouse_id}/{file_name}"
         )
+
+    def get_table_url(self, table_name: str, schema: Optional[str] = "dbo") -> str:
+        """Returns a Lakehouse URL for a specific table."""
+        if schema:
+            table_fqdn = str(Path("Tables") / schema / table_name)
+        else:
+            table_fqdn = str(Path("Tables") / table_name)
+        return self.get_file_url(table_fqdn)
 
     def get_file_system_client(self) -> FileSystemClient:
         """Returns a FileSystemClient for the Lakehouse."""

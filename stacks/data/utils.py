@@ -3,7 +3,6 @@
 This module provides a collection of generic helper functions and utilities to support Stacks Data.
 """
 import json
-import logging
 import os
 import re
 import requests
@@ -12,7 +11,9 @@ from collections import Counter
 from pathlib import Path
 from requests.exceptions import RequestException
 
-logger = logging.getLogger(__name__)
+from stacks.data.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def find_placeholders(input_str: str) -> list[str]:
