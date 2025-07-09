@@ -1,3 +1,10 @@
+## v2.1.0 (2025-07-09)
+
+### Feat
+
+- Utilities for Fabric Lakehouse, Data Factory and ETL (#29)
+- Utilities for Fabric Lakehouse, Data Factory and ETL
+
 ## v2.0.0 (2025-07-08)
 
 ### Feat
