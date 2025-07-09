@@ -12,7 +12,7 @@ from azure.identity import ClientSecretCredential
 logger = logging.getLogger(__name__)
 
 
-class DataFactory:
+class DataPipeline:
     def __init__(self, tenant_id: str, client_id: str, client_secret: str):
         """Initialize the DataFactory client with service principal credentials."""
         self.tenant_id = tenant_id

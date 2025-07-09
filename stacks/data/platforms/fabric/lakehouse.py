@@ -117,8 +117,8 @@ class LakehouseClient:
         """Deletes a list of directories from the Lakehouse.
 
         Args:
-            directory_paths: List of directories to delete within a lakehouse. These are typically paths to the files,
-                e.g., ["Files/Folder1", "Files/Folder2"].
+            directory_paths: List of directories to delete within a lakehouse. These are typically paths to the files
+                or tables, e.g., ["Files/Folder1", "Files/Folder2", "Tables/dbo/diabetes"].
         """
         full_directory_paths = [self._get_full_directory_path(path) for path in directory_paths]
         self.datalake_client.delete_directories(self.workspace_id, full_directory_paths)
