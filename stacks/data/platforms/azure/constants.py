@@ -23,10 +23,3 @@ CONFIG_CONTAINER_NAME = "config"
 
 # Automated test config
 AUTOMATED_TEST_OUTPUT_DIRECTORY_PREFIX = "automated_test"
-
-# Default Spark config
-DEFAULT_SPARK_CONFIG = {
-    "spark.jars.packages": "org.apache.hadoop:hadoop-azure:3.3.4,io.delta:delta-core_2.12:2.4.0",
-    "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension",
-    "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-}

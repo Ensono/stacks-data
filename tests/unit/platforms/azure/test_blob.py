@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import Mock, patch, call, mock_open
 from azure.storage.blob import ContainerClient
-from stacks.data.azure.blob import BlobStorageClient
+from stacks.data.platforms.azure.blob import BlobStorageClient
 
 TEST_CONTAINER = "test_container"
 TEST_DIRECTORY = "test_directory"
@@ -11,7 +11,7 @@ TEST_BLOB_PREFIX = f"{TEST_DIRECTORY}/"
 
 @pytest.fixture
 def mock_blob_client():
-    with patch("stacks.data.azure.blob.BlobServiceClient", autospec=True) as mock_service_client:
+    with patch("stacks.data.platforms.azure.blob.BlobServiceClient", autospec=True) as mock_service_client:
         mock_client = BlobStorageClient("teststorageaccount")
         mock_container_client = Mock(spec=ContainerClient)
         mock_blob_client = Mock(spec=BlobStorageClient)

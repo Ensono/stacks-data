@@ -4,7 +4,7 @@ This module is the entrypoint for executing Data Quality processing against data
 """
 import logging
 
-from stacks.data.constants import CONFIG_CONTAINER_NAME
+from stacks.data.platforms.azure.constants import CONFIG_CONTAINER_NAME
 from stacks.data.pyspark.data_quality.config import Config
 from stacks.data.pyspark.data_quality.utils import (
     add_expectation_suite,
@@ -14,7 +14,7 @@ from stacks.data.pyspark.data_quality.utils import (
     replace_adls_data_location,
 )
 
-from stacks.data.pyspark.etl import EtlSession
+from stacks.data.platforms.azure.etl import EtlSession
 from stacks.data.pyspark.pyspark_utils import read_datasource
 from stacks.data.utils import substitute_env_vars
 

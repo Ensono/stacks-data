@@ -2,11 +2,16 @@
 import logging
 import os
 from typing import Any, Optional
+
+from delta import configure_spark_with_delta_pip
 from delta.tables import DeltaTable
 from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame, SparkSession
 
-from stacks.data.constants import DEFAULT_SPARK_CONFIG
+from stacks.data.platforms.common.constants import (
+    SPARK_CONFIG_FOR_DELTA_INTEGRATION,
+    SPARK_PACKAGES_FOR_DELTA_INTEGRATION,
+)
 from stacks.data.utils import camel_to_snake, substitute_env_vars
 
 logger = logging.getLogger(__name__)
@@ -30,7 +35,7 @@ def get_spark_session(app_name: str, spark_config: dict[str, Any] = None) -> Spa
     if not spark:
         logger.info("Creating Spark session...")
 
-        config = DEFAULT_SPARK_CONFIG
+        config = SPARK_CONFIG_FOR_DELTA_INTEGRATION
 
         if spark_config:
             config.update(spark_config)
@@ -40,7 +45,7 @@ def get_spark_session(app_name: str, spark_config: dict[str, Any] = None) -> Spa
         for key, value in config.items():
             spark_builder = spark_builder.config(key, value)
 
-        spark = spark_builder.getOrCreate()
+        spark = configure_spark_with_delta_pip(spark_builder, SPARK_PACKAGES_FOR_DELTA_INTEGRATION).getOrCreate()
 
         logger.info("Spark session created.")
 

@@ -1,15 +1,15 @@
 import pytest
 from unittest.mock import Mock, patch
 from azure.storage.filedatalake import FileSystemClient, PathProperties
-from stacks.data.azure.adls import AdlsClient
+from stacks.data.platforms.common.datalake import DatalakeClient
 from pathlib import Path
 
 TEST_CSV_DIR = "tests/data/movies_dataset"
 
 
 @pytest.fixture
-def mock_adls_client():
-    with patch("stacks.data.azure.adls.DataLakeServiceClient", autospec=True) as mock_service_client:
+def mock_datalake_client():
+    with patch("stacks.data.platforms.common.datalake.DataLakeServiceClient", autospec=True) as mock_service_client:
 
         def get_paths_side_effect(path, recursive=True):
             test_path = Path(TEST_CSV_DIR)
@@ -24,7 +24,7 @@ def mock_adls_client():
 
             return mock_paths
 
-        mock_client = AdlsClient("teststorageaccount")
+        mock_client = DatalakeClient("https://teststorageaccount.dfs.core.windows.net")
         mock_file_system_client = Mock(spec=FileSystemClient)
         mock_file_system_client.get_paths.side_effect = get_paths_side_effect
         mock_service_client.return_value.get_file_system_client.return_value = mock_file_system_client
@@ -32,37 +32,37 @@ def mock_adls_client():
         yield mock_client
 
 
-def test_filter_directory_paths_adls(mock_adls_client):
-    result = mock_adls_client.filter_directory_paths_adls("container_name", "directory_path", "sub")
+def test_filter_directory_paths(mock_datalake_client):
+    result = mock_datalake_client.filter_directory_paths("container_name", "directory_path", "sub")
     assert result == ["subfolder"]
 
 
-def test_delete_directory_adls(mock_adls_client):
-    adls_directory_client_mock = mock_adls_client.adls_client.get_directory_client.return_value
+def test_delete_directory(mock_datalake_client):
+    adls_directory_client_mock = mock_datalake_client.datalake_client.get_directory_client.return_value
     adls_directory_client_mock.exists.return_value = True
 
-    mock_adls_client.delete_directory_adls("container_name", "directory_path")
+    mock_datalake_client.delete_directory("container_name", "directory_path")
 
-    mock_adls_client.adls_client.get_directory_client.assert_called_once()
+    mock_datalake_client.datalake_client.get_directory_client.assert_called_once()
     adls_directory_client_mock.exists.assert_called_once()
     adls_directory_client_mock.delete_directory.assert_called_once()
 
 
 @pytest.mark.parametrize("files", [["links.csv"], ["keywords.csv", "links.csv", "movies_metadata.csv", "ratings.csv"]])
-def test_all_files_present_in_adls(mock_adls_client, files):
-    result = mock_adls_client.all_files_present_in_adls("container_name", "directory_name", files)
+def test_all_files_present(mock_datalake_client, files):
+    result = mock_datalake_client.all_files_present("container_name", "directory_name", files)
     assert result is True
 
 
 @pytest.mark.parametrize("files", [["missing.csv"], ["links.csv", "missing.csv"]])
-def test_all_files_present_in_adls_error(mock_adls_client, files):
+def test_all_files_present_error(mock_datalake_client, files):
     with pytest.raises(AssertionError):
-        mock_adls_client.all_files_present_in_adls("container_name", "directory_name", files)
+        mock_datalake_client.all_files_present("container_name", "directory_name", files)
 
 
 @pytest.mark.parametrize("recursive", [True, False])
-def test_get_adls_directory_contents(mock_adls_client, recursive):
-    paths = mock_adls_client.get_adls_directory_contents("test_container", "test_path", recursive=recursive)
+def test_get_directory_contents(mock_datalake_client, recursive):
+    paths = mock_datalake_client.get_directory_contents("test_container", "test_path", recursive=recursive)
 
     test_path = Path(TEST_CSV_DIR)
     if recursive:
@@ -73,9 +73,16 @@ def test_get_adls_directory_contents(mock_adls_client, recursive):
     assert sorted(paths) == sorted(expected_paths)
 
 
-def test_get_adls_file_url(mock_adls_client):
-    container = "mycontainer"
-    file_name = "myfolder/myfile.txt"
-    expected_url = "abfss://mycontainer@teststorageaccount.dfs.core.windows.net/myfolder/myfile.txt"
+def test_upload_file(mock_datalake_client):
+    file_system = "test_container"
+    directory_path = "test_directory"
+    local_path = TEST_CSV_DIR
+    file_name = "links.csv"
 
-    assert mock_adls_client.get_adls_file_url(container, file_name) == expected_url
+    directory_client_mock = mock_datalake_client.datalake_client.get_directory_client.return_value
+    file_client_mock = directory_client_mock.get_file_client.return_value
+
+    mock_datalake_client.upload_file(file_system, directory_path, local_path, file_name)
+
+    directory_client_mock.get_file_client.assert_called_once_with(file_name)
+    file_client_mock.upload_data.assert_called_once()
