@@ -4,12 +4,12 @@ This module provides a class for interacting with the Microsoft Fabric REST API,
 specifically for triggering and polling pipelines.
 
 """
+import logging
+
 import requests
 from azure.identity import ClientSecretCredential
 
-from stacks.data.logger import get_logger
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataFactory:

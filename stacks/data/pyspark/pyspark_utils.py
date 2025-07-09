@@ -1,4 +1,5 @@
 """Spark common utilities."""
+import logging
 import os
 from typing import Any, Optional
 
@@ -7,14 +8,13 @@ from delta.tables import DeltaTable
 from pyspark.errors import AnalysisException
 from pyspark.sql import DataFrame, SparkSession
 
-from stacks.data.logger import get_logger
 from stacks.data.platforms.common.constants import (
     SPARK_CONFIG_FOR_DELTA_INTEGRATION,
     SPARK_PACKAGES_FOR_DELTA_INTEGRATION,
 )
 from stacks.data.utils import camel_to_snake, substitute_env_vars
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_spark_session(app_name: str, spark_config: dict[str, Any] = None) -> SparkSession:

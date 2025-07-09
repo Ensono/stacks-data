@@ -4,6 +4,7 @@ This module provides a collection of helper functions tailored for various ETL t
 designed to simplify complex operations, these functions streamline the transformation process between different data
 layers, such as Bronze-to-Silver or Silver-to-Gold.
 """
+import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,12 +13,11 @@ from typing import Any, Callable, Optional
 from dateutil.parser import isoparse
 from pyspark.sql import DataFrame, SparkSession
 
-from stacks.data.logger import get_logger
 from stacks.data.platforms.azure.adls import AdlsClient
 from stacks.data.platforms.azure.blob import BlobStorageClient
 from stacks.data.pyspark.pyspark_utils import get_spark_session, read_datasource, save_dataframe_as_delta
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @dataclass

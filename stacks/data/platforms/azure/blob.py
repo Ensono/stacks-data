@@ -3,12 +3,12 @@
 This module provides a collection of helper functions related to Azure Blob Storage.
 """
 import json
+import logging
+
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
-from stacks.data.logger import get_logger
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BlobStorageClient:

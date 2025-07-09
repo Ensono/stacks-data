@@ -2,6 +2,7 @@
 
 This module provides a client for interacting with Microsoft Fabric Lakehouse, extending the base DatalakeClient.
 """
+import logging
 import sys
 from pathlib import Path
 from typing import Optional
@@ -10,10 +11,9 @@ from azure.core.credentials import TokenCredential
 from azure.identity import DefaultAzureCredential
 from azure.storage.filedatalake import DataLakeDirectoryClient, FileSystemClient
 
-from stacks.data.logger import get_logger
 from stacks.data.platforms.common.datalake import DatalakeClient
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_credential() -> TokenCredential | DefaultAzureCredential:
