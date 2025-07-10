@@ -1,3 +1,9 @@
+## v2.1.2 (2025-07-10)
+
+### Fix
+
+- 2890 downgrade azure dependencies for Fabric consistency (#31)
+
 ## v2.1.1 (2025-07-10)
 
 ### Fix
