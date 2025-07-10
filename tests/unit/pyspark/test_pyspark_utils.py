@@ -40,7 +40,8 @@ def test_read_datasource_as_table(spark):
     df = spark.createDataFrame(sample_data)
 
     table_name = "test_table"
-    df.write.format("delta").mode("overwrite").saveAsTable(table_name)
+    spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+    df.write.format("delta").saveAsTable(table_name)
 
     df_read = read_datasource(spark, table_name, "table")
 
