@@ -26,7 +26,7 @@ build-backend = "poetry.core.masonry.api"
 python = "^3.9"
 
 # Core dependencies
-azure-core = "1.30.2"
+azure-core = "1.38.0"
 azure-identity = "1.16.1"
 azure-mgmt-datafactory = "^3.1.0"
 azure-storage-file-datalake = "^12.16.0"
