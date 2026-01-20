@@ -232,21 +232,22 @@ tracing = ["opentelemetry-api (>=1.26,<2.0)"]
 
 [[package]]
 name = "azure-identity"
-version = "1.16.1"
+version = "1.25.1"
 description = "Microsoft Azure Identity Library for Python"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "azure-identity-1.16.1.tar.gz", hash = "sha256:6d93f04468f240d59246d8afde3091494a5040d4f141cad0f49fc0c399d0d91e"},
-    {file = "azure_identity-1.16.1-py3-none-any.whl", hash = "sha256:8fb07c25642cd4ac422559a8b50d3e77f73dcc2bbfaba419d06d6c9d7cff6726"},
+    {file = "azure_identity-1.25.1-py3-none-any.whl", hash = "sha256:e9edd720af03dff020223cd269fa3a61e8f345ea75443858273bcb44844ab651"},
+    {file = "azure_identity-1.25.1.tar.gz", hash = "sha256:87ca8328883de6036443e1c37b40e8dc8fb74898240f61071e09d2e369361456"},
 ]
 
 [package.dependencies]
-azure-core = ">=1.23.0"
+azure-core = ">=1.31.0"
 cryptography = ">=2.5"
-msal = ">=1.24.0"
-msal-extensions = ">=0.3.0"
+msal = ">=1.30.0"
+msal-extensions = ">=1.2.0"
+typing-extensions = ">=4.0.0"
 
 [[package]]
 name = "azure-mgmt-core"
@@ -735,19 +736,19 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "click-loglevel"
-version = "0.4.0.post1"
+version = "0.7.0"
 description = "Log level parameter type for Click"
 optional = true
-python-versions = "~=3.6"
+python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"cli\""
 files = [
-    {file = "click-loglevel-0.4.0.post1.tar.gz", hash = "sha256:470bf1e208fe650cedacb23061e4e18d36df601ca9d8b79e6d8e8cdf1792ece1"},
-    {file = "click_loglevel-0.4.0.post1-py3-none-any.whl", hash = "sha256:f3449b5d28d6cba5bfbeed371ad59950aba035730d5cc28a32b4e7632e17ed6c"},
+    {file = "click_loglevel-0.7.0-py3-none-any.whl", hash = "sha256:5f7ca7af45545c17ecfcbfcaa469667016652bdc859dbeb104cee7503ab0f7b6"},
+    {file = "click_loglevel-0.7.0.tar.gz", hash = "sha256:a0a623fbe35d87f65ae266f8ab27dcc7e7de1015c0b2bdca45c57f3ef01f61f5"},
 ]
 
 [package.dependencies]
-click = ">=6.0"
+click = ">=8.0"
 
 [[package]]
 name = "colorama"
@@ -1685,7 +1686,7 @@ files = [
     {file = "jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"},
     {file = "jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"},
 ]
-markers = {main = "extra == \"cli\" or extra == \"data-quality\""}
+markers = {main = "extra == \"data-quality\" or extra == \"cli\""}
 
 [package.dependencies]
 MarkupSafe = ">=2.0"
@@ -2149,7 +2150,7 @@ files = [
     {file = "markupsafe-3.0.3-cp39-cp39-win_arm64.whl", hash = "sha256:38664109c14ffc9e7437e86b4dceb442b0096dfe3541d7864d9cbe1da4cf36c8"},
     {file = "markupsafe-3.0.3.tar.gz", hash = "sha256:722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698"},
 ]
-markers = {main = "extra == \"cli\" or extra == \"data-quality\""}
+markers = {main = "extra == \"data-quality\" or extra == \"cli\""}
 
 [[package]]
 name = "marshmallow"
@@ -4539,4 +4540,4 @@ data-quality = ["great-expectations"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "602fbd165ea8c7b61cb5664d3bf975f2e3cf3cb57a417de29f84a03040a504e8"
+content-hash = "3e0c38319061d8e30650a575b2c119e4ab9da3a06f0238db6995ef8687a34f09"
