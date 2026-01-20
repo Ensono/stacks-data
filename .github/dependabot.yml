@@ -6,29 +6,22 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
-    open-pull-requests-limit: 10
+      timezone: "Europe/London"
+    open-pull-requests-limit: 50
     labels:
       - "dependencies"
       - "python"
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
+    rebase-strategy: "disabled"
     # Group minor and patch updates together
     groups:
-      development-dependencies:
-        dependency-type: "development"
+      low-risk:
+        applies-to: "version-updates"
         update-types:
           - "minor"
           - "patch"
-      production-dependencies:
-        dependency-type: "production"
-        update-types:
-          - "minor"
-          - "patch"
-    # Allow version updates
-    allow:
-      - dependency-type: "all"
     # Ignore specific dependencies with known issues
     ignore:
       # nbconvert: No fix available for CVE-2025-53000 (Windows-only)
@@ -44,10 +37,18 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 50
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
       prefix: "chore(ci)"
       include: "scope"
+    rebase-strategy: "disabled"
+    groups:
+      low-risk:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
