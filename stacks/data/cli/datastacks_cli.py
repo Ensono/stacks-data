@@ -2,6 +2,7 @@
 
 This module provides command-line interfaces to generate and manage data workloads within the Stacks Data Platform.
 """
+
 import logging
 
 from stacks.data.logger import setup_logger

@@ -2,6 +2,7 @@
 
 This module provides a collection of helper functions related to Azure Data Factory.
 """
+
 import logging
 import sys
 

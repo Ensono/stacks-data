@@ -1,17 +1,17 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.29.0
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args: ["-c=yamllint.conf"]
   - repo: https://github.com/pycqa/flake8
-    rev: "5.0.4"
+    rev: "7.3.0"
     hooks:
       - id: flake8
         exclude: |
@@ -22,10 +22,9 @@ repos:
         args:
           - "--max-line-length=120"
   - repo: https://github.com/psf/black
-    rev: 22.8.0
+    rev: 26.1.0
     hooks:
       - id: black
-        language_version: python3.10
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.3.0
     hooks:
