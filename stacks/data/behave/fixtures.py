@@ -3,6 +3,7 @@
 This module contains a range of standard fixtures to be used as part of Behave tests running against Azure data
 workloads.
 """
+
 import logging
 from os import listdir
 from os.path import isfile, join

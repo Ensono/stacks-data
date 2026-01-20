@@ -2,6 +2,7 @@
 
 This module provides a base client for Azure Data Lake Storage (ADLS) and Microsoft Fabric Lakehouse.
 """
+
 import logging
 import os
 from typing import Optional

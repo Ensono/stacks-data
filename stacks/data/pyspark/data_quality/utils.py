@@ -1,4 +1,5 @@
 """Data quality utility functions to set up validations."""
+
 from datetime import date
 import logging
 import re

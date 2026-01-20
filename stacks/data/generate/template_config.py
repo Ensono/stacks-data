@@ -2,6 +2,7 @@
 
 Classes specifying the configuration used for generation of data workloads from templates.
 """
+
 import yaml
 from abc import ABC, abstractmethod
 from datetime import date, datetime

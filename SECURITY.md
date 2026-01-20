@@ -27,9 +27,9 @@ We aim to respond to security reports within 48 hours.
 
 ### nbconvert Windows Vulnerability (CVE-2025-53000)
 
-**Status:** No patch available  
-**Affected Component:** nbconvert ≤ 7.16.6 (transitive dependency via great-expectations)  
-**Platform:** Windows only  
+**Status:** No patch available
+**Affected Component:** nbconvert ≤ 7.16.6 (transitive dependency via great-expectations)
+**Platform:** Windows only
 **Severity:** High (CVSS 8.5)
 
 #### Description

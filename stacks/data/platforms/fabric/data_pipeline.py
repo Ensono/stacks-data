@@ -4,6 +4,7 @@ This module provides a class for interacting with the Microsoft Fabric REST API,
 specifically for triggering and polling pipelines.
 
 """
+
 import logging
 
 import requests

@@ -58,8 +58,9 @@ def mock_adls_client():
 
 @pytest.fixture
 def mock_etl_session(mock_adls_client, spark):
-    with patch("stacks.data.platforms.azure.etl.EtlSession.get_spark_session_for_adls", return_value=spark), patch(
-        "stacks.data.platforms.azure.etl.AdlsClient", return_value=mock_adls_client
+    with (
+        patch("stacks.data.platforms.azure.etl.EtlSession.get_spark_session_for_adls", return_value=spark),
+        patch("stacks.data.platforms.azure.etl.AdlsClient", return_value=mock_adls_client),
     ):
         etl_session = EtlSession("pyspark-test")
         yield etl_session
@@ -202,9 +203,13 @@ def test_read_latest_rundate_data(spark, mock_adls_client, tmp_path):
         )
         df.write.format("delta").mode("overwrite").save(str(data_path))
 
-    with patch(
-        "stacks.data.platforms.azure.adls.AdlsClient.get_directory_contents", side_effect=mock_get_directory_contents
-    ), patch("stacks.data.platforms.azure.adls.AdlsClient.get_file_url", side_effect=mock_get_file_url):
+    with (
+        patch(
+            "stacks.data.platforms.azure.adls.AdlsClient.get_directory_contents",
+            side_effect=mock_get_directory_contents,
+        ),
+        patch("stacks.data.platforms.azure.adls.AdlsClient.get_file_url", side_effect=mock_get_file_url),
+    ):
 
         df = read_latest_rundate_data(spark, mock_adls_client, "dummy", str(tmp_path), "delta")
 
