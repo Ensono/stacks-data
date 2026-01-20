@@ -3,6 +3,7 @@
 This module provides utility functions to automate the generation of data pipelines and workloads. It facilitates
 rendering templates based on the provided config, and writing out the rendered templates to the specified directories.
 """
+
 import os
 from pathlib import Path
 from typing import Type

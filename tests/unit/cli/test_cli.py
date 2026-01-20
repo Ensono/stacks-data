@@ -5,7 +5,6 @@ from click.testing import CliRunner
 from pydantic import ValidationError
 from stacks.data.cli.datastacks_cli import ingest, processing
 
-
 TEST_CONFIG_DIRECTORY = "tests/data/template_config/"
 TEST_CONFIG_INGEST_MINIMAL = TEST_CONFIG_DIRECTORY + "test_config_ingest_minimal.yml"
 TEST_CONFIG_INGEST_FULL = TEST_CONFIG_DIRECTORY + "test_config_ingest_full.yml"

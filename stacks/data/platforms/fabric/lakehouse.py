@@ -2,6 +2,7 @@
 
 This module provides a client for interacting with Microsoft Fabric Lakehouse, extending the base DatalakeClient.
 """
+
 import logging
 import sys
 from pathlib import Path

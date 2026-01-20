@@ -2,6 +2,7 @@
 
 Classes specifying the configuration used for data quality processing.
 """
+
 from pydantic import BaseModel, Field
 
 

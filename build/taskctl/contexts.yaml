@@ -13,7 +13,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - docker.io/ensono/eir-azure-data:1.1.257-amd64
+        - docker.io/ensono/eir-azure-data:1.2.39-amd64
         - pwsh
         - -NoProfile
         - -Command

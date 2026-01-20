@@ -6,6 +6,12 @@
 * [Stacks Azure Data Platform - Documentation](https://stacks.ensono.com/docs/workloads/azure/data/intro_data_azure)
 * [Datastacks CLI - Documentation](https://stacks.ensono.com/docs/workloads/azure/data/data_engineering/datastacks)
 
+## Security
+
+⚠️ **Windows Users:** Be aware of a known security vulnerability in nbconvert (CVE-2025-53000) that affects PDF conversion on Windows systems. See [SECURITY.md](SECURITY.md) for details and mitigation strategies.
+
+For general security concerns, please review our [Security Policy](SECURITY.md).
+
 ## Installation
 
 stacks-data is modular, allowing you to install only what you need, keeping the installation lightweight and efficient. By default, stacks-data installs only core functionality, focussed on Pyspark and Azure operations.

@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 120
+exclude = .venv,.git
+# Ignore docstring errors for __init__ files, modules, and classes
+# D100: Missing docstring in public module
+# D101: Missing docstring in public class
+# D104: Missing docstring in public package
+# D401: First line should be in imperative mood (conflicts with descriptive docstrings)
+# W503: Line break before binary operator (deprecated, conflicts with W504)
+per-file-ignores =
+    */__init__.py:D104
+    tests/*:D100,D101,D103
+ignore = D100,D101,D104,D401,W503

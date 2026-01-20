@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 50
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    rebase-strategy: "disabled"
+    # Group minor and patch updates together
+    groups:
+      low-risk:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore specific dependencies with known issues
+    ignore:
+      # nbconvert: No fix available for CVE-2025-53000 (Windows-only)
+      # Keeping current version until upstream provides patch
+      # See SECURITY.md for mitigation details
+      - dependency-name: "nbconvert"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+        # Will re-enable when CVE-2025-53000 is patched
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 50
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    rebase-strategy: "disabled"
+    groups:
+      low-risk:
+        applies-to: "version-updates"
+        update-types:
+          - "minor"
+          - "patch"

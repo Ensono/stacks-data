@@ -2,6 +2,7 @@
 
 This module is the entrypoint for executing Data Quality processing against datasets, based upon provided configuration.
 """
+
 import logging
 
 from stacks.data.platforms.azure.constants import CONFIG_CONTAINER_NAME
