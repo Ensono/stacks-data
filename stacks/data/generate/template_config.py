@@ -61,7 +61,7 @@ class WorkloadConfigBaseModel(BaseModel, ABC):
     stacks_data_package_version: str = Field(
         default=get_latest_package_version("stacks-data"),
         description="Version of the stacks-data Python package to use on the job cluster, e.g. 0.3.0.",
-        regex=r"\d+\.\d+\.\d+.*",
+        pattern=r"\d+\.\d+\.\d+.*",
     )
 
     @classmethod
