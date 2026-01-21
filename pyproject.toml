@@ -58,7 +58,7 @@ data-quality = ["great-expectations"]
 pytest = "^7.4.4"
 black = ">=23.12.1,<27.0.0"
 pre-commit = ">=3.8,<5.0"
-flake8 = "^6.1.0"
+flake8 = ">=6.1,<8.0"
 flake8-docstrings = "^1.7.0"
 pydocstyle = "^6.3.0"
 tomli = "^2.0.1"
