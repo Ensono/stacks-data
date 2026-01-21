@@ -46,7 +46,7 @@ jinja2 = { version = "^3.1.4", optional = true }
 # Note: great-expectations brings in nbconvert as a transitive dependency.
 # nbconvert has a known Windows-only vulnerability (CVE-2025-53000) with no fix available.
 # See SECURITY.md for mitigation strategies. Linux/macOS users are not affected.
-great-expectations = { version = "^0.17.23", optional = true }
+great-expectations = { version = ">=0.17.23,<0.19.0", optional = true }
 
 [tool.poetry.extras]
 # Additional dependency groups
