@@ -65,7 +65,7 @@ tomli = "^2.0.1"
 pytest-mock = "^3.14.0"
 coverage = "^7.6.1"
 commitizen = "^4.8.3"
-chispa = "^0.11.1"
+chispa = ">=0.11.1,<0.13.0"
 
 [tool.poetry.scripts]
 datastacks = "stacks.data.cli.datastacks_cli:cli"
